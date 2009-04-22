@@ -15,6 +15,7 @@ package fitnesse.maven.widget;
 import fitnesse.html.HtmlUtil;
 import fitnesse.maven.util.FileUtil;
 import fitnesse.maven.util.MavenDependencyResolver;
+import fitnesse.maven.util.MavenException;
 import fitnesse.wiki.PageData;
 import fitnesse.wikitext.WidgetBuilder;
 import fitnesse.wikitext.widgets.ClasspathWidget;
@@ -38,6 +39,8 @@ public class PomWidget extends ClasspathWidget {
     public static final String REGEXP = "^!pom [^\r\n]*";
     private static final Pattern pattern = Pattern.compile("^!pom (.*)", Pattern.CASE_INSENSITIVE);
     private File pomFile;
+    private boolean errorOccured = false;
+    private String errorMessage;
 
     public PomWidget(ParentWidget parentWidget, String inputText) throws Exception {
         super(parentWidget, inputText);
@@ -47,7 +50,12 @@ public class PomWidget extends ClasspathWidget {
             String pomParent = parsePomParentDir(inputText);
             CLASSPATH_WIDGET_FACTORY.build(parentWidget, pomParent + "classes");
             CLASSPATH_WIDGET_FACTORY.build(parentWidget, pomParent + "test-classes");
-            CLASSPATH_WIDGET_FACTORY.build(parentWidget, MAVEN_DEPENDENCY_RESOLVER.resolve(pomFile));
+            try {
+                CLASSPATH_WIDGET_FACTORY.build(parentWidget, MAVEN_DEPENDENCY_RESOLVER.resolve(pomFile));
+            } catch (MavenException err) {
+                errorOccured = true;
+                errorMessage = err.getMessage();
+            }
         }
     }
 
@@ -66,6 +74,9 @@ public class PomWidget extends ClasspathWidget {
 
     @Override
     public String render() throws Exception {
+        if (errorOccured) {
+            return HtmlUtil.metaText("Maven POM: " + pomFile) + HtmlUtil.BRtag + "<pre>" + errorMessage + "</pre>";
+        }
         if (FILE_UTIL.exists(pomFile))
             return HtmlUtil.metaText("Maven POM: " + pomFile) + HtmlUtil.BRtag;
         else

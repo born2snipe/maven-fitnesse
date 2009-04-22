@@ -37,7 +37,6 @@ public class MavenDependencyResolver {
             return dependencyCache.getDependencies(pomFile);
         }
         String consoleOutput = commandShell.execute(pomFile.getParentFile(), mvnCommand(), "dependency:build-classpath", "-DincludeScope=test");
-        System.out.println("consoleOutput = " + consoleOutput);
         if (buildFailure(consoleOutput)) {
             throw new MavenException(consoleOutput);
         }
