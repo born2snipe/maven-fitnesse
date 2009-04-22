@@ -8,16 +8,22 @@ import java.util.List;
 public class MavenDependencyResolver {
 
     private CommandShell commandShell;
+    private DependencyCache dependencyCache;
 
     public MavenDependencyResolver() {
-        this(new CommandShell());
+        this(new CommandShell(), new DependencyCache());
     }
 
-    protected MavenDependencyResolver(CommandShell commandShell) {
+
+    protected MavenDependencyResolver(CommandShell commandShell, DependencyCache dependencyCache) {
         this.commandShell = commandShell;
+        this.dependencyCache = dependencyCache;
     }
 
     public List<String> resolve(File pomFile) {
+        if (!dependencyCache.hasChanged(pomFile)) {
+            return dependencyCache.getDependencies(pomFile);
+        }
         String pathText = grabClassPathFromConsoleOutput(commandShell.execute(pomFile.getParentFile(), "mvn", "dependency:build-classpath", "-DincludeScope=test"));
         return Arrays.asList(pathText.split(":|;"));
     }
@@ -30,9 +36,5 @@ public class MavenDependencyResolver {
             }
         }
         return "";
-    }
-
-    private static class PomCache {
-        
     }
 }

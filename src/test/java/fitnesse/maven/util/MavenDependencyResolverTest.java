@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.List;
 
 
 public class MavenDependencyResolverTest extends TestCase {
@@ -31,16 +32,28 @@ public class MavenDependencyResolverTest extends TestCase {
 
     private MavenDependencyResolver resolver;
     private CommandShell commandShell;
+    private DependencyCache dependencyCache;
 
     protected void setUp() throws Exception {
         super.setUp();
         commandShell = mock(CommandShell.class);
-        resolver = new MavenDependencyResolver(commandShell);
+        dependencyCache = mock(DependencyCache.class);
+        resolver = new MavenDependencyResolver(commandShell, dependencyCache);
     }
-    
+
+    public void test_Cached() {
+        List<String> dependencies = Arrays.asList("junit.jar");
+
+        when(dependencyCache.hasChanged(POM_FILE)).thenReturn(false);
+        when(dependencyCache.getDependencies(POM_FILE)).thenReturn(dependencies);
+
+        assertSame(dependencies, resolver.resolve(POM_FILE));
+    }
+
     public void test_multipleDependencies_NotCached_Windows() {
         String consoleOutput = createMavenOutput(";", "/classworlds-1.1.jar", "/junit.jar");
 
+        when(dependencyCache.hasChanged(POM_FILE)).thenReturn(true);
         when(commandShell.execute(POM_FILE.getParentFile(), "mvn", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
 
         assertEquals(Arrays.asList("/classworlds-1.1.jar", "/junit.jar"), resolver.resolve(POM_FILE));
@@ -49,6 +62,7 @@ public class MavenDependencyResolverTest extends TestCase {
     public void test_multipleDependencies_NotCached_Unix() {
         String consoleOutput = createMavenOutput(":", "/classworlds-1.1.jar", "/junit.jar");
 
+        when(dependencyCache.hasChanged(POM_FILE)).thenReturn(true);
         when(commandShell.execute(POM_FILE.getParentFile(), "mvn", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
 
         assertEquals(Arrays.asList("/classworlds-1.1.jar", "/junit.jar"), resolver.resolve(POM_FILE));
@@ -57,6 +71,7 @@ public class MavenDependencyResolverTest extends TestCase {
     public void test_singleDependency_NotCached() {
         String consoleOutput = createMavenOutput(";", "/classworlds-1.1.jar");
 
+        when(dependencyCache.hasChanged(POM_FILE)).thenReturn(true);
         when(commandShell.execute(POM_FILE.getParentFile(), "mvn", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
 
         assertEquals(Arrays.asList("/classworlds-1.1.jar"), resolver.resolve(POM_FILE));
