@@ -36,31 +36,31 @@ public class MavenDependencyResolver {
         if (!dependencyCache.hasChanged(pomFile)) {
             return dependencyCache.getDependencies(pomFile);
         }
-	    String consoleOutput = commandShell.execute(pomFile.getParentFile(), mvnCommand(), "dependency:build-classpath", "-DincludeScope=test");
-	    System.out.println("consoleOutput = " + consoleOutput);
-	    if (buildFailure(consoleOutput)) {
-			throw new MavenException(grabReasonForFailure(consoleOutput));
-	    }
-	    String pathText = grabClassPathFromConsoleOutput(consoleOutput);
-        List<String> dependencies = Arrays.asList(pathText.split(":|;"));
+        String consoleOutput = commandShell.execute(pomFile.getParentFile(), mvnCommand(), "dependency:build-classpath", "-DincludeScope=test");
+        System.out.println("consoleOutput = " + consoleOutput);
+        if (buildFailure(consoleOutput)) {
+            throw new MavenException(grabReasonForFailure(consoleOutput));
+        }
+        String pathText = grabClassPathFromConsoleOutput(consoleOutput);
+        List<String> dependencies = Arrays.asList(pathText.split(getPathSeperator()));
         dependencyCache.cache(pomFile, dependencies);
         return dependencies;
     }
 
 
-	private String grabReasonForFailure(String consoleOutput) {
-		int reasonIndex = consoleOutput.indexOf("Reason:");
-		int endIndex = consoleOutput.indexOf("[INFO]", reasonIndex);
-		return consoleOutput.substring(reasonIndex, endIndex).trim();
-	}
+    private String grabReasonForFailure(String consoleOutput) {
+        int reasonIndex = consoleOutput.indexOf("Reason:");
+        int endIndex = consoleOutput.indexOf("[INFO]", reasonIndex);
+        return consoleOutput.substring(reasonIndex, endIndex).trim();
+    }
 
 
-	private boolean buildFailure(String consoleOutput) {
-		return consoleOutput.contains("MavenExecutionException");
-	}
+    private boolean buildFailure(String consoleOutput) {
+        return consoleOutput.contains("MavenExecutionException");
+    }
 
 
-	private String grabClassPathFromConsoleOutput(String output) {
+    private String grabClassPathFromConsoleOutput(String output) {
         List<String> lines = Arrays.asList(output.split("\n"));
         for (int i = 0; i < lines.size(); i++) {
             if (lines.get(i).contains("Dependencies classpath")) {
@@ -71,9 +71,20 @@ public class MavenDependencyResolver {
     }
 
     private String mvnCommand() {
-        if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+        if (isWindows()) {
             return "mvn.bat";
         }
         return "mvn";
+    }
+
+    private String getPathSeperator() {
+        if (isWindows()) {
+            return ";";
+        }
+        return ":";
+    }
+
+    private boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().contains("windows");
     }
 }

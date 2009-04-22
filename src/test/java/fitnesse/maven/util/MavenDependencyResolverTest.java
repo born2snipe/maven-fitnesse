@@ -182,12 +182,12 @@ public class MavenDependencyResolverTest extends TestCase {
 	public void test_multipleDependencies_NotCached_Windows() {
 		System.setProperty("os.name", "windows");
 
-		String consoleOutput = createMavenOutput(";", "/classworlds-1.1.jar", "/junit.jar");
+		String consoleOutput = createMavenOutput(";", "c:/users/common/classworlds-1.1.jar", "/junit.jar");
 
 		when(dependencyCache.hasChanged(POM_FILE)).thenReturn(true);
 		when(commandShell.execute(POM_FILE.getParentFile(), "mvn.bat", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
 
-		List<String> expectedDependencies = Arrays.asList("/classworlds-1.1.jar", "/junit.jar");
+		List<String> expectedDependencies = Arrays.asList("c:/users/common/classworlds-1.1.jar", "/junit.jar");
 		assertEquals(expectedDependencies, resolver.resolve(POM_FILE));
 
 		verify(dependencyCache).cache(POM_FILE, expectedDependencies);
