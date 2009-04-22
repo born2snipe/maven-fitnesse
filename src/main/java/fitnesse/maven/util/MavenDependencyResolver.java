@@ -39,7 +39,7 @@ public class MavenDependencyResolver {
         String consoleOutput = commandShell.execute(pomFile.getParentFile(), mvnCommand(), "dependency:build-classpath", "-DincludeScope=test");
         System.out.println("consoleOutput = " + consoleOutput);
         if (buildFailure(consoleOutput)) {
-            throw new MavenException(grabReasonForFailure(consoleOutput));
+            throw new MavenException(consoleOutput);
         }
         String pathText = grabClassPathFromConsoleOutput(consoleOutput);
         List<String> dependencies = Arrays.asList(pathText.split(getPathSeperator()));
@@ -48,15 +48,8 @@ public class MavenDependencyResolver {
     }
 
 
-    private String grabReasonForFailure(String consoleOutput) {
-        int reasonIndex = consoleOutput.indexOf("Reason:");
-        int endIndex = consoleOutput.indexOf("[INFO]", reasonIndex);
-        return consoleOutput.substring(reasonIndex, endIndex).trim();
-    }
-
-
     private boolean buildFailure(String consoleOutput) {
-        return consoleOutput.contains("MavenExecutionException");
+        return consoleOutput.contains("MavenExecutionException") || consoleOutput.contains("BUILD ERROR");
     }
 
 
