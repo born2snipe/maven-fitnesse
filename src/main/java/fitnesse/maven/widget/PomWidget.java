@@ -22,7 +22,6 @@ import fitnesse.wikitext.widgets.ClasspathWidget;
 import fitnesse.wikitext.widgets.ParentWidget;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,12 +43,8 @@ public class PomWidget extends ClasspathWidget {
     public PomWidget(ParentWidget parentWidget, String inputText) throws Exception {
         super(parentWidget, inputText);
         pomFile = parsePomFile(inputText);
-        if (!FILE_UTIL.exists(pomFile))
-            throw new FileNotFoundException("Could not find POM file '" + pomFile + "'");
-        try {
+        if (FILE_UTIL.exists(pomFile)) {
             createClasspathWidgets(parentWidget, MAVEN_DEPENDENCY_RESOLVER.resolve(pomFile));
-        } catch (Exception errr) {
-            errr.printStackTrace();
         }
     }
 
@@ -67,6 +62,9 @@ public class PomWidget extends ClasspathWidget {
 
     @Override
     public String render() throws Exception {
-        return HtmlUtil.metaText("Maven POM: " + pomFile) + HtmlUtil.BRtag;
+        if (FILE_UTIL.exists(pomFile))
+            return HtmlUtil.metaText("Maven POM: " + pomFile) + HtmlUtil.BRtag;
+        else
+            return HtmlUtil.metaText("Maven POM could NOT be found: "+pomFile);
     }
 }
