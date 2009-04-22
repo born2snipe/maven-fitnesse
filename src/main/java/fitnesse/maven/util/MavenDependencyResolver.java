@@ -25,7 +25,9 @@ public class MavenDependencyResolver {
             return dependencyCache.getDependencies(pomFile);
         }
         String pathText = grabClassPathFromConsoleOutput(commandShell.execute(pomFile.getParentFile(), "mvn", "dependency:build-classpath", "-DincludeScope=test"));
-        return Arrays.asList(pathText.split(":|;"));
+        List<String> dependencies = Arrays.asList(pathText.split(":|;"));
+        dependencyCache.cache(pomFile, dependencies);
+        return dependencies;
     }
 
     private String grabClassPathFromConsoleOutput(String output) {

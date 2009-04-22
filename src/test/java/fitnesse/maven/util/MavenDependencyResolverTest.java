@@ -4,6 +4,8 @@ import fitnesse.util.StringUtil;
 import junit.framework.TestCase;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.text.MessageFormat;
@@ -56,7 +58,10 @@ public class MavenDependencyResolverTest extends TestCase {
         when(dependencyCache.hasChanged(POM_FILE)).thenReturn(true);
         when(commandShell.execute(POM_FILE.getParentFile(), "mvn", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
 
-        assertEquals(Arrays.asList("/classworlds-1.1.jar", "/junit.jar"), resolver.resolve(POM_FILE));
+        List<String> expectedDependencies = Arrays.asList("/classworlds-1.1.jar", "/junit.jar");
+        assertEquals(expectedDependencies, resolver.resolve(POM_FILE));
+        
+        verify(dependencyCache).cache(POM_FILE, expectedDependencies);
     }
 
     public void test_multipleDependencies_NotCached_Unix() {
@@ -65,7 +70,10 @@ public class MavenDependencyResolverTest extends TestCase {
         when(dependencyCache.hasChanged(POM_FILE)).thenReturn(true);
         when(commandShell.execute(POM_FILE.getParentFile(), "mvn", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
 
-        assertEquals(Arrays.asList("/classworlds-1.1.jar", "/junit.jar"), resolver.resolve(POM_FILE));
+        List<String> expectedDependencies = Arrays.asList("/classworlds-1.1.jar", "/junit.jar");
+        assertEquals(expectedDependencies, resolver.resolve(POM_FILE));
+
+        verify(dependencyCache).cache(POM_FILE, expectedDependencies);
     }
 
     public void test_singleDependency_NotCached() {
@@ -74,7 +82,10 @@ public class MavenDependencyResolverTest extends TestCase {
         when(dependencyCache.hasChanged(POM_FILE)).thenReturn(true);
         when(commandShell.execute(POM_FILE.getParentFile(), "mvn", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
 
-        assertEquals(Arrays.asList("/classworlds-1.1.jar"), resolver.resolve(POM_FILE));
+        List<String> expectedDependencies = Arrays.asList("/classworlds-1.1.jar");
+        assertEquals(expectedDependencies, resolver.resolve(POM_FILE));
+
+        verify(dependencyCache).cache(POM_FILE, expectedDependencies);
     }
 
     private String createMavenOutput(String delimiter, String... jars) {
