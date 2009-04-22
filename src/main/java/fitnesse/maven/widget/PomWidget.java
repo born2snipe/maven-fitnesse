@@ -42,6 +42,7 @@ public class PomWidget extends ClasspathWidget {
 
     public PomWidget(ParentWidget parentWidget, String inputText) throws Exception {
         super(parentWidget, inputText);
+        
         pomFile = parsePomFile(inputText);
         if (FILE_UTIL.exists(pomFile)) {
             createClasspathWidgets(parentWidget, MAVEN_DEPENDENCY_RESOLVER.resolve(pomFile));

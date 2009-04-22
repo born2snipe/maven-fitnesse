@@ -36,7 +36,7 @@ public class MavenDependencyResolver {
         if (!dependencyCache.hasChanged(pomFile)) {
             return dependencyCache.getDependencies(pomFile);
         }
-        String pathText = grabClassPathFromConsoleOutput(commandShell.execute(pomFile.getParentFile(), "mvn", "dependency:build-classpath", "-DincludeScope=test"));
+        String pathText = grabClassPathFromConsoleOutput(commandShell.execute(pomFile.getParentFile(), mvnCommand(), "dependency:build-classpath", "-DincludeScope=test"));
         List<String> dependencies = Arrays.asList(pathText.split(":|;"));
         dependencyCache.cache(pomFile, dependencies);
         return dependencies;
@@ -50,5 +50,12 @@ public class MavenDependencyResolver {
             }
         }
         return "";
+    }
+
+    private String mvnCommand() {
+        if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+            return "mvn.bat";
+        }
+        return "mvn";
     }
 }

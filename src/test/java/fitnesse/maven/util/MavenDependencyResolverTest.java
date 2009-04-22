@@ -44,12 +44,18 @@ public class MavenDependencyResolverTest extends TestCase {
     private MavenDependencyResolver resolver;
     private CommandShell commandShell;
     private DependencyCache dependencyCache;
+    private String originalOs;
 
     protected void setUp() throws Exception {
         super.setUp();
+        originalOs = System.getProperty("os.name");
         commandShell = mock(CommandShell.class);
         dependencyCache = mock(DependencyCache.class);
         resolver = new MavenDependencyResolver(commandShell, dependencyCache);
+    }
+
+    protected void tearDown() {
+        System.setProperty("os.name", originalOs);
     }
 
     public void test_Cached() {
@@ -62,10 +68,12 @@ public class MavenDependencyResolverTest extends TestCase {
     }
 
     public void test_multipleDependencies_NotCached_Windows() {
+        System.setProperty("os.name", "windows");
+
         String consoleOutput = createMavenOutput(";", "/classworlds-1.1.jar", "/junit.jar");
 
         when(dependencyCache.hasChanged(POM_FILE)).thenReturn(true);
-        when(commandShell.execute(POM_FILE.getParentFile(), "mvn", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
+        when(commandShell.execute(POM_FILE.getParentFile(), "mvn.bat", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
 
         List<String> expectedDependencies = Arrays.asList("/classworlds-1.1.jar", "/junit.jar");
         assertEquals(expectedDependencies, resolver.resolve(POM_FILE));
@@ -74,6 +82,8 @@ public class MavenDependencyResolverTest extends TestCase {
     }
 
     public void test_multipleDependencies_NotCached_Unix() {
+        System.setProperty("os.name", "mac");
+
         String consoleOutput = createMavenOutput(":", "/classworlds-1.1.jar", "/junit.jar");
 
         when(dependencyCache.hasChanged(POM_FILE)).thenReturn(true);
@@ -86,6 +96,8 @@ public class MavenDependencyResolverTest extends TestCase {
     }
 
     public void test_singleDependency_NotCached() {
+        System.setProperty("os.name", "mac");
+
         String consoleOutput = createMavenOutput(";", "/classworlds-1.1.jar");
 
         when(dependencyCache.hasChanged(POM_FILE)).thenReturn(true);
