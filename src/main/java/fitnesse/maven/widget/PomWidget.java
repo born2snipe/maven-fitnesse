@@ -25,6 +25,8 @@ import fitnesse.wikitext.widgets.ClasspathWidget;
 import fitnesse.wikitext.widgets.ParentWidget;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,10 +60,12 @@ public class PomWidget extends ClasspathWidget {
 		pomFile = new File(parsePomFile(inputText));
 		if (FILE_UTIL.exists(pomFile)) {
 			String pomParent = parsePomParentDir(inputText);
-			CLASSPATH_WIDGET_FACTORY.build(this, pomParent + "target/classes");
-			CLASSPATH_WIDGET_FACTORY.build(this, pomParent + "target/test-classes");
+			List<String> dependencies = new ArrayList<String>();
+			dependencies.add(pomParent + "target/classes");
+			dependencies.add(pomParent + "target/test-classes");
 			try {
-				CLASSPATH_WIDGET_FACTORY.build(this, MAVEN_DEPENDENCY_RESOLVER.resolve(pomFile));
+				dependencies.addAll(MAVEN_DEPENDENCY_RESOLVER.resolve(pomFile));
+				CLASSPATH_WIDGET_FACTORY.build(this, dependencies);
 			}
 			catch (MavenException err) {
 				errorMessage = err.getMessage();
@@ -145,5 +149,12 @@ public class PomWidget extends ClasspathWidget {
 	private String parsePomParentDir(String input) {
 		String pomFile = parsePomFile(input);
 		return pomFile.substring(0, pomFile.indexOf("pom.xml"));
+	}
+
+
+	@Override
+	public String getText() throws Exception {
+		ClasspathWidget classPathWidget = (ClasspathWidget) getChildren().get(0);
+		return classPathWidget.getText();
 	}
 }

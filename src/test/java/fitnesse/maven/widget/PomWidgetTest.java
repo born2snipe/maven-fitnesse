@@ -73,9 +73,8 @@ public class PomWidgetTest extends TestCase {
 
 		PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
 
-		verify(classpathWidgetFactory).build(widget, dependencies);
-		verify(classpathWidgetFactory).build(widget, "/blah/target/classes");
-		verify(classpathWidgetFactory).build(widget, "/blah/target/test-classes");
+		verify(classpathWidgetFactory).build(widget, Arrays.asList("/blah/target/classes", "/blah/target/test-classes", "junit.jar", "jmock.jar"));
+		verifyNoMoreInteractions(classpathWidgetFactory);
 
 		String expectedHtml = "<div class=\"collapse_rim\">" +
 				"<a href=\"javascript:toggleCollapsable('maven-pom');\">" +
@@ -97,9 +96,8 @@ public class PomWidgetTest extends TestCase {
 
 		PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
 
-		verify(classpathWidgetFactory).build(widget, dependencies);
-		verify(classpathWidgetFactory).build(widget, "/blah/target/classes");
-		verify(classpathWidgetFactory).build(widget, "/blah/target/test-classes");
+		verify(classpathWidgetFactory).build(widget, Arrays.asList("/blah/target/classes", "/blah/target/test-classes", "junit.jar"));
+		verifyNoMoreInteractions(classpathWidgetFactory);
 	}
 
 
