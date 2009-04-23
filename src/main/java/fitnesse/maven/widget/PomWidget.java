@@ -39,7 +39,6 @@ public class PomWidget extends ClasspathWidget {
     public static final String REGEXP = "^!pom [^\r\n]*";
     private static final Pattern pattern = Pattern.compile("^!pom (.*)", Pattern.CASE_INSENSITIVE);
     private File pomFile;
-    private boolean errorOccured = false;
     private String errorMessage;
 
     public PomWidget(ParentWidget parentWidget, String inputText) throws Exception {
@@ -53,7 +52,6 @@ public class PomWidget extends ClasspathWidget {
             try {
                 CLASSPATH_WIDGET_FACTORY.build(parentWidget, MAVEN_DEPENDENCY_RESOLVER.resolve(pomFile));
             } catch (MavenException err) {
-                errorOccured = true;
                 errorMessage = err.getMessage();
             }
         }
@@ -74,7 +72,7 @@ public class PomWidget extends ClasspathWidget {
 
     @Override
     public String render() throws Exception {
-        if (errorOccured) {
+        if (errorMessage != null) {
             return HtmlUtil.metaText("Maven POM: " + pomFile) + HtmlUtil.BRtag + "<pre>" + errorMessage + "</pre>";
         }
         if (FILE_UTIL.exists(pomFile))
