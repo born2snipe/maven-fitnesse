@@ -12,7 +12,6 @@
  */
 package fitnesse.maven.widget;
 
-import fitnesse.html.HtmlUtil;
 import fitnesse.maven.util.FileUtil;
 import fitnesse.maven.util.MavenDependencyResolver;
 import fitnesse.maven.util.MavenException;
@@ -26,61 +25,87 @@ import java.util.List;
 
 
 public class PomWidgetTest extends TestCase {
-    private MavenDependencyResolver mavenDependencyResolver;
-    private FileUtil fileUtil;
-    private ParentWidget parentWidget;
-    private ClasspathWidgetFactory classpathWidgetFactory;
+	private ClasspathWidgetFactory classpathWidgetFactory;
+	private FileUtil fileUtil;
+	private MavenDependencyResolver mavenDependencyResolver;
+	private ParentWidget parentWidget;
 
-    protected void setUp() throws Exception {
-        super.setUp();
-        mavenDependencyResolver = mock(MavenDependencyResolver.class);
-        fileUtil = mock(FileUtil.class);
-        parentWidget = mock(ParentWidget.class);
-        classpathWidgetFactory = mock(ClasspathWidgetFactory.class);
 
-        PomWidget.FILE_UTIL = fileUtil;
-        PomWidget.MAVEN_DEPENDENCY_RESOLVER = mavenDependencyResolver;
-        PomWidget.CLASSPATH_WIDGET_FACTORY = classpathWidgetFactory;
-    }
+	protected void setUp() throws Exception {
+		super.setUp();
+		mavenDependencyResolver = mock(MavenDependencyResolver.class);
+		fileUtil = mock(FileUtil.class);
+		parentWidget = mock(ParentWidget.class);
+		classpathWidgetFactory = mock(ClasspathWidgetFactory.class);
 
-    public void test_resolverThrowsException() throws Exception {
-        File pomFile = new File("/blah/pom.xml");
+		PomWidget.FILE_UTIL = fileUtil;
+		PomWidget.MAVEN_DEPENDENCY_RESOLVER = mavenDependencyResolver;
+		PomWidget.CLASSPATH_WIDGET_FACTORY = classpathWidgetFactory;
+	}
 
-        when(fileUtil.exists(pomFile)).thenReturn(true);
-        when(mavenDependencyResolver.resolve(pomFile)).thenThrow(new MavenException("error"));
 
-        PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
+	public void test_resolverThrowsException() throws Exception {
+		File pomFile = new File("/blah/pom.xml");
 
-        assertEquals(HtmlUtil.metaText("Maven POM: " + pomFile) + HtmlUtil.BRtag + "<pre>error</pre>", widget.render());
-    }
+		when(fileUtil.exists(pomFile)).thenReturn(true);
+		when(mavenDependencyResolver.resolve(pomFile)).thenThrow(new MavenException("error"));
 
-    public void test_multipleDependencies() throws Exception {
-        File pomFile = new File("/blah/pom.xml");
-        List<String> dependencies = Arrays.asList("junit.jar", "jmock.jar");
+		PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
 
-        when(fileUtil.exists(pomFile)).thenReturn(true);
-        when(mavenDependencyResolver.resolve(pomFile)).thenReturn(dependencies);
+		String expectedHtml = "<div class=\"collapse_rim\">" +
+				"<a href=\"javascript:toggleCollapsable('maven-pom');\">" +
+				"<img src=\"/files/images/collapsableOpen.gif\" class=\"left\" id=\"imgmaven-pom\"/>" +
+				"</a>" +
+				"<span class=\"meta\">&nbsp;Maven POM: \\blah\\pom.xml</span>" +
+				"<div class=\"collapsable\" id=\"maven-pom\"><pre>error</pre></div>" +
+				"</div>";
 
-        new PomWidget(parentWidget, "!pom /blah/pom.xml");
+		assertEquals(expectedHtml, removeEndingWhitespace(widget.render()));
+	}
 
-        verify(classpathWidgetFactory).build(parentWidget, dependencies);
-        verify(classpathWidgetFactory).build(parentWidget, "/blah/classes");
-        verify(classpathWidgetFactory).build(parentWidget, "/blah/test-classes");
-    }
 
-    public void test_singleDependency() throws Exception {
-        File pomFile = new File("/blah/pom.xml");
-        List<String> dependencies = Arrays.asList("junit.jar");
+	public void test_multipleDependencies() throws Exception {
+		File pomFile = new File("/blah/pom.xml");
+		List<String> dependencies = Arrays.asList("junit.jar", "jmock.jar");
 
-        when(fileUtil.exists(pomFile)).thenReturn(true);
-        when(mavenDependencyResolver.resolve(pomFile)).thenReturn(dependencies);
+		when(fileUtil.exists(pomFile)).thenReturn(true);
+		when(mavenDependencyResolver.resolve(pomFile)).thenReturn(dependencies);
 
-        new PomWidget(parentWidget, "!pom /blah/pom.xml");
+		PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
 
-        verify(classpathWidgetFactory).build(parentWidget, dependencies);
-        verify(classpathWidgetFactory).build(parentWidget, "/blah/classes");
-        verify(classpathWidgetFactory).build(parentWidget, "/blah/test-classes");
-    }
+		verify(classpathWidgetFactory).build(widget, dependencies);
+		verify(classpathWidgetFactory).build(widget, "/blah/classes");
+		verify(classpathWidgetFactory).build(widget, "/blah/test-classes");
+
+		String expectedHtml = "<div class=\"collapse_rim\">" +
+				"<a href=\"javascript:toggleCollapsable('maven-pom');\">" +
+				"<img src=\"/files/images/collapsableClosed.gif\" class=\"left\" id=\"imgmaven-pom\"/></a>" +
+				"<span class=\"meta\">&nbsp;Maven POM: \\blah\\pom.xml</span>" +
+				"<div class=\"hidden\" id=\"maven-pom\"></div>" +
+				"</div>";
+
+		assertEquals(expectedHtml, removeEndingWhitespace(widget.render()));
+	}
+
+
+	public void test_singleDependency() throws Exception {
+		File pomFile = new File("/blah/pom.xml");
+		List<String> dependencies = Arrays.asList("junit.jar");
+
+		when(fileUtil.exists(pomFile)).thenReturn(true);
+		when(mavenDependencyResolver.resolve(pomFile)).thenReturn(dependencies);
+
+		PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
+
+		verify(classpathWidgetFactory).build(widget, dependencies);
+		verify(classpathWidgetFactory).build(widget, "/blah/classes");
+		verify(classpathWidgetFactory).build(widget, "/blah/test-classes");
+	}
+
+
+	private String removeEndingWhitespace(String value) {
+		return value.replaceAll("\\s{2,10}", "");
+	}
 
 
 }
