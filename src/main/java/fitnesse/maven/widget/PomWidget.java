@@ -61,8 +61,8 @@ public class PomWidget extends ClasspathWidget {
 		if (FILE_UTIL.exists(pomFile)) {
 			String pomParent = parsePomParentDir(inputText);
 			List<String> dependencies = new ArrayList<String>();
-			dependencies.add(pomParent + "target/classes");
-			dependencies.add(pomParent + "target/test-classes");
+			dependencies.add(pomParent + "target" + getFilePathSeparator() + "classes");
+			dependencies.add(pomParent + "target" + getFilePathSeparator() + "test-classes");
 			try {
 				dependencies.addAll(MAVEN_DEPENDENCY_RESOLVER.resolve(pomFile));
 				CLASSPATH_WIDGET_FACTORY.build(this, dependencies);
@@ -71,6 +71,13 @@ public class PomWidget extends ClasspathWidget {
 				errorMessage = err.getMessage();
 			}
 		}
+	}
+
+
+	@Override
+	public String getText() throws Exception {
+		ClasspathWidget classPathWidget = (ClasspathWidget) getChildren().get(0);
+		return classPathWidget.getText();
 	}
 
 
@@ -96,11 +103,21 @@ public class PomWidget extends ClasspathWidget {
 	}
 
 
+	private String getFilePathSeparator() {
+		return isWindows() ? "\\" : "/";
+	}
+
+
 	private String imageSrc(boolean expanded) {
 		if (expanded)
 			return collapsableOpenImg;
 		else
 			return collapsableClosedImg;
+	}
+
+
+	private boolean isWindows() {
+		return System.getProperty("os.name").toLowerCase().contains("windows");
 	}
 
 
@@ -149,12 +166,5 @@ public class PomWidget extends ClasspathWidget {
 	private String parsePomParentDir(String input) {
 		String pomFile = parsePomFile(input);
 		return pomFile.substring(0, pomFile.indexOf("pom.xml"));
-	}
-
-
-	@Override
-	public String getText() throws Exception {
-		ClasspathWidget classPathWidget = (ClasspathWidget) getChildren().get(0);
-		return classPathWidget.getText();
 	}
 }

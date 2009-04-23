@@ -29,10 +29,14 @@ public class PomWidgetTest extends TestCase {
 	private FileUtil fileUtil;
 	private MavenDependencyResolver mavenDependencyResolver;
 	private ParentWidget parentWidget;
+	private String originalOs;
 
 
 	protected void setUp() throws Exception {
 		super.setUp();
+
+		originalOs = System.getProperty("os.name");
+
 		mavenDependencyResolver = mock(MavenDependencyResolver.class);
 		fileUtil = mock(FileUtil.class);
 		parentWidget = mock(ParentWidget.class);
@@ -41,6 +45,14 @@ public class PomWidgetTest extends TestCase {
 		PomWidget.FILE_UTIL = fileUtil;
 		PomWidget.MAVEN_DEPENDENCY_RESOLVER = mavenDependencyResolver;
 		PomWidget.CLASSPATH_WIDGET_FACTORY = classpathWidgetFactory;
+	}
+
+
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+
+		System.setProperty("os.name", originalOs);
 	}
 
 
@@ -65,6 +77,8 @@ public class PomWidgetTest extends TestCase {
 
 
 	public void test_multipleDependencies() throws Exception {
+		System.setProperty("os.name", "mac");
+
 		File pomFile = new File("/blah/pom.xml");
 		List<String> dependencies = Arrays.asList("junit.jar", "jmock.jar");
 
@@ -87,7 +101,9 @@ public class PomWidgetTest extends TestCase {
 	}
 
 
-	public void test_singleDependency() throws Exception {
+	public void test_singleDependency_Unix() throws Exception {
+		System.setProperty("os.name", "mac");
+
 		File pomFile = new File("/blah/pom.xml");
 		List<String> dependencies = Arrays.asList("junit.jar");
 
@@ -97,6 +113,21 @@ public class PomWidgetTest extends TestCase {
 		PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
 
 		verify(classpathWidgetFactory).build(widget, Arrays.asList("/blah/target/classes", "/blah/target/test-classes", "junit.jar"));
+		verifyNoMoreInteractions(classpathWidgetFactory);
+	}
+
+	public void test_singleDependency_Windows() throws Exception {
+		System.setProperty("os.name", "windows");
+
+		File pomFile = new File("\\blah\\pom.xml");
+		List<String> dependencies = Arrays.asList("junit.jar");
+
+		when(fileUtil.exists(pomFile)).thenReturn(true);
+		when(mavenDependencyResolver.resolve(pomFile)).thenReturn(dependencies);
+
+		PomWidget widget = new PomWidget(parentWidget, "!pom \\blah\\pom.xml");
+
+		verify(classpathWidgetFactory).build(widget, Arrays.asList("\\blah\\target\\classes", "\\blah\\target\\test-classes", "junit.jar"));
 		verifyNoMoreInteractions(classpathWidgetFactory);
 	}
 
