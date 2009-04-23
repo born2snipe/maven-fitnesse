@@ -58,8 +58,8 @@ public class PomWidget extends ClasspathWidget {
 		pomFile = new File(parsePomFile(inputText));
 		if (FILE_UTIL.exists(pomFile)) {
 			String pomParent = parsePomParentDir(inputText);
-			CLASSPATH_WIDGET_FACTORY.build(this, pomParent + "classes");
-			CLASSPATH_WIDGET_FACTORY.build(this, pomParent + "test-classes");
+			CLASSPATH_WIDGET_FACTORY.build(this, pomParent + "target/classes");
+			CLASSPATH_WIDGET_FACTORY.build(this, pomParent + "target/test-classes");
 			try {
 				CLASSPATH_WIDGET_FACTORY.build(this, MAVEN_DEPENDENCY_RESOLVER.resolve(pomFile));
 			}
@@ -72,7 +72,7 @@ public class PomWidget extends ClasspathWidget {
 
 	@Override
 	public String render() throws Exception {
-		RawHtml titleElement = new RawHtml(HtmlUtil.metaText("&nbsp;Maven POM: " + pomFile));
+		RawHtml titleElement = createTitleElement("Maven POM: " + pomFile);
 		RawHtml bodyElement = new RawHtml(childHtml());
 		boolean expanded = false;
 		if (errorMessage != null) {
@@ -80,10 +80,15 @@ public class PomWidget extends ClasspathWidget {
 			expanded = true;
 		}
 		else if (!FILE_UTIL.exists(pomFile)) {
-			titleElement = new RawHtml(HtmlUtil.metaText("Maven POM could NOT be found: " + pomFile));
+			titleElement = createTitleElement("Maven POM could NOT be found: " + pomFile);
 		}
 		HtmlElement html = makeCollapsableSection(titleElement, bodyElement, expanded);
 		return html.html();
+	}
+
+
+	private RawHtml createTitleElement(String text) {
+		return new RawHtml("<b>" + HtmlUtil.metaText("&nbsp;" + text) + "</b>");
 	}
 
 

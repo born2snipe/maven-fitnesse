@@ -56,7 +56,7 @@ public class PomWidgetTest extends TestCase {
 				"<a href=\"javascript:toggleCollapsable('maven-pom');\">" +
 				"<img src=\"/files/images/collapsableOpen.gif\" class=\"left\" id=\"imgmaven-pom\"/>" +
 				"</a>" +
-				"<span class=\"meta\">&nbsp;Maven POM: \\blah\\pom.xml</span>" +
+				"<b><span class=\"meta\">&nbsp;Maven POM: \\blah\\pom.xml</span></b>" +
 				"<div class=\"collapsable\" id=\"maven-pom\"><pre>error</pre></div>" +
 				"</div>";
 
@@ -74,13 +74,13 @@ public class PomWidgetTest extends TestCase {
 		PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
 
 		verify(classpathWidgetFactory).build(widget, dependencies);
-		verify(classpathWidgetFactory).build(widget, "/blah/classes");
-		verify(classpathWidgetFactory).build(widget, "/blah/test-classes");
+		verify(classpathWidgetFactory).build(widget, "/blah/target/classes");
+		verify(classpathWidgetFactory).build(widget, "/blah/target/test-classes");
 
 		String expectedHtml = "<div class=\"collapse_rim\">" +
 				"<a href=\"javascript:toggleCollapsable('maven-pom');\">" +
 				"<img src=\"/files/images/collapsableClosed.gif\" class=\"left\" id=\"imgmaven-pom\"/></a>" +
-				"<span class=\"meta\">&nbsp;Maven POM: \\blah\\pom.xml</span>" +
+				"<b><span class=\"meta\">&nbsp;Maven POM: \\blah\\pom.xml</span></b>" +
 				"<div class=\"hidden\" id=\"maven-pom\"></div>" +
 				"</div>";
 
@@ -98,8 +98,8 @@ public class PomWidgetTest extends TestCase {
 		PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
 
 		verify(classpathWidgetFactory).build(widget, dependencies);
-		verify(classpathWidgetFactory).build(widget, "/blah/classes");
-		verify(classpathWidgetFactory).build(widget, "/blah/test-classes");
+		verify(classpathWidgetFactory).build(widget, "/blah/target/classes");
+		verify(classpathWidgetFactory).build(widget, "/blah/target/test-classes");
 	}
 
 
