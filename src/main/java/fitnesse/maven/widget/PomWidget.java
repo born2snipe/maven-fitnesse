@@ -16,10 +16,7 @@ import fitnesse.html.HtmlElement;
 import fitnesse.html.HtmlTag;
 import fitnesse.html.HtmlUtil;
 import fitnesse.html.RawHtml;
-import fitnesse.maven.util.FileUtil;
-import fitnesse.maven.util.MavenDependencyResolver;
-import fitnesse.maven.util.MavenException;
-import fitnesse.maven.util.MavenOutputDirectoryResolver;
+import fitnesse.maven.util.*;
 import fitnesse.wiki.PageData;
 import fitnesse.wikitext.WidgetBuilder;
 import fitnesse.wikitext.widgets.ClasspathWidget;
@@ -39,14 +36,15 @@ public class PomWidget extends ClasspathWidget {
     protected static ClasspathWidgetFactory CLASSPATH_WIDGET_FACTORY = new ClasspathWidgetFactory();
     protected static FileUtil FILE_UTIL = new FileUtil();
     protected static MavenDependencyResolver MAVEN_DEPENDENCY_RESOLVER = new MavenDependencyResolver();
-    protected static MavenOutputDirectoryResolver MAVEN_OUTPUT_DIR_RESOLVER = new MavenOutputDirectoryResolver();
+    protected static IdGenerator ID_GENERATOR = new IdGenerator();
 
+    protected static MavenOutputDirectoryResolver MAVEN_OUTPUT_DIR_RESOLVER = new MavenOutputDirectoryResolver();
     private static final Pattern pattern = Pattern.compile("^!pom (.*)", Pattern.CASE_INSENSITIVE);
     private static final String collapsableClosedCss = "hidden";
     private static final String collapsableClosedImg = "/files/images/collapsableClosed.gif";
     private static final String collapsableOpenCss = "collapsable";
-    private static final String collapsableOpenImg = "/files/images/collapsableOpen.gif";
 
+    private static final String collapsableOpenImg = "/files/images/collapsableOpen.gif";
     private File pomFile;
     private String cssClass = "collapse_rim";
     private String errorMessage;
@@ -125,7 +123,7 @@ public class PomWidget extends ClasspathWidget {
 
 
     private HtmlElement makeCollapsableSection(HtmlElement title, HtmlElement content, boolean expanded) {
-        String id = "maven-pom";
+        String id = "maven-pom-"+ID_GENERATOR.generate();
 
         HtmlTag outerDiv = HtmlUtil.makeDivTag(cssClass);
 

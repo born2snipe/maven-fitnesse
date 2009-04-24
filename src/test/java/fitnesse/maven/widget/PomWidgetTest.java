@@ -12,10 +12,7 @@
  */
 package fitnesse.maven.widget;
 
-import fitnesse.maven.util.FileUtil;
-import fitnesse.maven.util.MavenDependencyResolver;
-import fitnesse.maven.util.MavenException;
-import fitnesse.maven.util.MavenOutputDirectoryResolver;
+import fitnesse.maven.util.*;
 import fitnesse.wikitext.widgets.ParentWidget;
 import junit.framework.TestCase;
 import static org.mockito.Mockito.*;
@@ -31,6 +28,7 @@ public class PomWidgetTest extends TestCase {
     private MavenDependencyResolver mavenDependencyResolver;
     private ParentWidget parentWidget;
     private MavenOutputDirectoryResolver mavenOutputDirectoryResolver;
+    private IdGenerator idGenerator;
 
 
     protected void setUp() throws Exception {
@@ -41,11 +39,13 @@ public class PomWidgetTest extends TestCase {
         parentWidget = mock(ParentWidget.class);
         classpathWidgetFactory = mock(ClasspathWidgetFactory.class);
         mavenOutputDirectoryResolver = mock(MavenOutputDirectoryResolver.class);
+        idGenerator = mock(IdGenerator.class);
 
         PomWidget.FILE_UTIL = fileUtil;
         PomWidget.MAVEN_DEPENDENCY_RESOLVER = mavenDependencyResolver;
         PomWidget.CLASSPATH_WIDGET_FACTORY = classpathWidgetFactory;
         PomWidget.MAVEN_OUTPUT_DIR_RESOLVER = mavenOutputDirectoryResolver;
+        PomWidget.ID_GENERATOR = idGenerator;
     }
 
 
@@ -54,15 +54,16 @@ public class PomWidgetTest extends TestCase {
 
         when(fileUtil.exists(pomFile)).thenReturn(true);
         when(mavenDependencyResolver.resolve(pomFile)).thenThrow(new MavenException("error"));
+        when(idGenerator.generate()).thenReturn("1");
 
         PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
 
         String expectedHtml = "<div class=\"collapse_rim\">" +
-                "<a href=\"javascript:toggleCollapsable('maven-pom');\">" +
-                "<img src=\"/files/images/collapsableOpen.gif\" class=\"left\" id=\"imgmaven-pom\"/>" +
+                "<a href=\"javascript:toggleCollapsable('maven-pom-1');\">" +
+                "<img src=\"/files/images/collapsableOpen.gif\" class=\"left\" id=\"imgmaven-pom-1\"/>" +
                 "</a>" +
                 "<b><span class=\"meta\">&nbsp;Maven POM: /blah/pom.xml</span></b>" +
-                "<div class=\"collapsable\" id=\"maven-pom\"><pre>error</pre></div>" +
+                "<div class=\"collapsable\" id=\"maven-pom-1\"><pre>error</pre></div>" +
                 "</div>";
 
         assertEquals(expectedHtml, removeEndingWhitespace(widget.render()));
@@ -76,6 +77,7 @@ public class PomWidgetTest extends TestCase {
         when(fileUtil.exists(pomFile)).thenReturn(true);
         when(mavenOutputDirectoryResolver.resolve(pomFile)).thenReturn(Arrays.asList("/target/classes"));
         when(mavenDependencyResolver.resolve(pomFile)).thenReturn(dependencies);
+        when(idGenerator.generate()).thenReturn("1");
 
         PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
 
@@ -83,10 +85,10 @@ public class PomWidgetTest extends TestCase {
         verifyNoMoreInteractions(classpathWidgetFactory);
 
         String expectedHtml = "<div class=\"collapse_rim\">" +
-                "<a href=\"javascript:toggleCollapsable('maven-pom');\">" +
-                "<img src=\"/files/images/collapsableClosed.gif\" class=\"left\" id=\"imgmaven-pom\"/></a>" +
+                "<a href=\"javascript:toggleCollapsable('maven-pom-1');\">" +
+                "<img src=\"/files/images/collapsableClosed.gif\" class=\"left\" id=\"imgmaven-pom-1\"/></a>" +
                 "<b><span class=\"meta\">&nbsp;Maven POM: /blah/pom.xml</span></b>" +
-                "<div class=\"hidden\" id=\"maven-pom\"></div>" +
+                "<div class=\"hidden\" id=\"maven-pom-1\"></div>" +
                 "</div>";
 
         assertEquals(expectedHtml, removeEndingWhitespace(widget.render()));
@@ -131,20 +133,21 @@ public class PomWidgetTest extends TestCase {
         when(fileUtil.exists(dir)).thenReturn(true);
         when(fileUtil.isDirectory(dir)).thenReturn(true);
         when(fileUtil.exists(pomFile)).thenReturn(false);
+        when(idGenerator.generate()).thenReturn("1");
 
         PomWidget widget = new PomWidget(parentWidget, "!pom /blah");
 
         verifyNoMoreInteractions(classpathWidgetFactory);
 
         String expectedHtml = "<div class=\"collapse_rim\">" +
-                "<a href=\"javascript:toggleCollapsable('maven-pom');\">" +
-                "<img src=\"/files/images/collapsableClosed.gif\" class=\"left\" id=\"imgmaven-pom\"/></a>" +
+                "<a href=\"javascript:toggleCollapsable('maven-pom-1');\">" +
+                "<img src=\"/files/images/collapsableClosed.gif\" class=\"left\" id=\"imgmaven-pom-1\"/></a>" +
                 "<b><span class=\"meta\">&nbsp;Maven POM could NOT be found: /blah/pom.xml</span></b>" +
-                "<div class=\"hidden\" id=\"maven-pom\"></div></div>";
+                "<div class=\"hidden\" id=\"maven-pom-1\"></div></div>";
 
         assertEquals(expectedHtml, removeEndingWhitespace(widget.render()));
     }
-
+            
 
     private String removeEndingWhitespace(String value) {
         return value.replaceAll("\\s{2,10}", "").replaceAll("\n", "");
