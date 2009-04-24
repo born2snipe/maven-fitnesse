@@ -34,11 +34,11 @@ public class PomWidget extends ClasspathWidget {
     public static final String REGEXP = "^!pom [^\r\n]*";
 
     protected static ClasspathWidgetFactory CLASSPATH_WIDGET_FACTORY = new ClasspathWidgetFactory();
-    protected static FileUtil FILE_UTIL = new FileUtil();
     protected static MavenDependencyResolver MAVEN_DEPENDENCY_RESOLVER = new MavenDependencyResolver();
     protected static IdGenerator ID_GENERATOR = new IdGenerator();
-
     protected static MavenOutputDirectoryResolver MAVEN_OUTPUT_DIR_RESOLVER = new MavenOutputDirectoryResolver();
+    protected static MavenPomResolver MAVEN_POM_RESOLVER = new MavenPomResolver();
+
     private static final Pattern pattern = Pattern.compile("^!pom (.*)", Pattern.CASE_INSENSITIVE);
     private static final String collapsableClosedCss = "hidden";
     private static final String collapsableClosedImg = "/files/images/collapsableClosed.gif";
@@ -48,6 +48,7 @@ public class PomWidget extends ClasspathWidget {
     private File pomFile;
     private String cssClass = "collapse_rim";
     private String errorMessage;
+    private String pomFileInput;
 
 
     static {
@@ -58,22 +59,17 @@ public class PomWidget extends ClasspathWidget {
     public PomWidget(ParentWidget parentWidget, String inputText) throws Exception {
         super(parentWidget, inputText);
 
-        pomFile = new File(parsePomFile(inputText));
-        if (FILE_UTIL.exists(pomFile)) {
-            if (FILE_UTIL.isDirectory(pomFile)) {
-                pomFile = new File(pomFile, "pom.xml");
-            }
-            if (FILE_UTIL.exists(pomFile)) {
-                List<String> dependencies = new ArrayList<String>();
-                try {
-                    dependencies.addAll(MAVEN_OUTPUT_DIR_RESOLVER.resolve(pomFile));
-                    dependencies.addAll(MAVEN_DEPENDENCY_RESOLVER.resolve(pomFile));
-                    CLASSPATH_WIDGET_FACTORY.build(this, dependencies);
-                }
-                catch (MavenException err) {
-                    errorMessage = err.getMessage();
-                }
-            }
+        pomFileInput = parsePomFile(inputText);
+        pomFile = MAVEN_POM_RESOLVER.resolve(new File(pomFileInput));
+
+        List<String> dependencies = new ArrayList<String>();
+        try {
+            dependencies.addAll(MAVEN_OUTPUT_DIR_RESOLVER.resolve(pomFile));
+            dependencies.addAll(MAVEN_DEPENDENCY_RESOLVER.resolve(pomFile));
+            CLASSPATH_WIDGET_FACTORY.build(this, dependencies);
+        }
+        catch (MavenException err) {
+            errorMessage = err.getMessage();
         }
     }
 
@@ -93,8 +89,8 @@ public class PomWidget extends ClasspathWidget {
         if (errorMessage != null) {
             bodyElement = new RawHtml("<pre>" + errorMessage + "</pre>");
             expanded = true;
-        } else if (!FILE_UTIL.exists(pomFile)) {
-            titleElement = createTitleElement("Maven POM could NOT be found: " + pomFile);
+        } else if (pomFile == null) {
+            titleElement = createTitleElement("Maven POM could NOT be found: " + pomFileInput);
         }
         HtmlElement html = makeCollapsableSection(titleElement, bodyElement, expanded);
         return html.html();
@@ -123,7 +119,7 @@ public class PomWidget extends ClasspathWidget {
 
 
     private HtmlElement makeCollapsableSection(HtmlElement title, HtmlElement content, boolean expanded) {
-        String id = "maven-pom-"+ID_GENERATOR.generate();
+        String id = "maven-pom-" + ID_GENERATOR.generate();
 
         HtmlTag outerDiv = HtmlUtil.makeDivTag(cssClass);
 
