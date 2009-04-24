@@ -19,6 +19,7 @@ import fitnesse.html.RawHtml;
 import fitnesse.maven.util.FileUtil;
 import fitnesse.maven.util.MavenDependencyResolver;
 import fitnesse.maven.util.MavenException;
+import fitnesse.maven.util.MavenOutputDirectoryResolver;
 import fitnesse.wiki.PageData;
 import fitnesse.wikitext.WidgetBuilder;
 import fitnesse.wikitext.widgets.ClasspathWidget;
@@ -33,138 +34,123 @@ import java.util.regex.Pattern;
 
 public class PomWidget extends ClasspathWidget {
 
-	public static final String REGEXP = "^!pom [^\r\n]*";
-	protected static ClasspathWidgetFactory CLASSPATH_WIDGET_FACTORY = new ClasspathWidgetFactory();
-	protected static FileUtil FILE_UTIL = new FileUtil();
-	protected static MavenDependencyResolver MAVEN_DEPENDENCY_RESOLVER = new MavenDependencyResolver();
-	private static final Pattern pattern = Pattern.compile("^!pom (.*)", Pattern.CASE_INSENSITIVE);
-	private static final String collapsableClosedCss = "hidden";
-	private static final String collapsableClosedImg = "/files/images/collapsableClosed.gif";
-	private static final String collapsableInvisibleCss = "invisible";
-	private static final String collapsableOpenCss = "collapsable";
-	private static final String collapsableOpenImg = "/files/images/collapsableOpen.gif";
-	private File pomFile;
+    public static final String REGEXP = "^!pom [^\r\n]*";
 
-	private String cssClass = "collapse_rim";
-	private String errorMessage;
+    protected static ClasspathWidgetFactory CLASSPATH_WIDGET_FACTORY = new ClasspathWidgetFactory();
+    protected static FileUtil FILE_UTIL = new FileUtil();
+    protected static MavenDependencyResolver MAVEN_DEPENDENCY_RESOLVER = new MavenDependencyResolver();
+    protected static MavenOutputDirectoryResolver MAVEN_OUTPUT_DIR_RESOLVER = new MavenOutputDirectoryResolver();
 
+    private static final Pattern pattern = Pattern.compile("^!pom (.*)", Pattern.CASE_INSENSITIVE);
+    private static final String collapsableClosedCss = "hidden";
+    private static final String collapsableClosedImg = "/files/images/collapsableClosed.gif";
+    private static final String collapsableInvisibleCss = "invisible";
+    private static final String collapsableOpenCss = "collapsable";
+    private static final String collapsableOpenImg = "/files/images/collapsableOpen.gif";
 
-	static {
-		PageData.classpathWidgetBuilder = new WidgetBuilder(new Class[]{ClasspathWidget.class, PomWidget.class});
-	}
+    private File pomFile;
+    private String cssClass = "collapse_rim";
+    private String errorMessage;
 
 
-	public PomWidget(ParentWidget parentWidget, String inputText) throws Exception {
-		super(parentWidget, inputText);
-
-		pomFile = new File(parsePomFile(inputText));
-		if (FILE_UTIL.exists(pomFile)) {
-			String pomParent = parsePomParentDir(inputText);
-			List<String> dependencies = new ArrayList<String>();
-			dependencies.add(pomParent + "target" + getFilePathSeparator() + "classes");
-			dependencies.add(pomParent + "target" + getFilePathSeparator() + "test-classes");
-			try {
-				dependencies.addAll(MAVEN_DEPENDENCY_RESOLVER.resolve(pomFile));
-				CLASSPATH_WIDGET_FACTORY.build(this, dependencies);
-			}
-			catch (MavenException err) {
-				errorMessage = err.getMessage();
-			}
-		}
-	}
+    static {
+        PageData.classpathWidgetBuilder = new WidgetBuilder(new Class[]{ClasspathWidget.class, PomWidget.class});
+    }
 
 
-	@Override
-	public String getText() throws Exception {
-		ClasspathWidget classPathWidget = (ClasspathWidget) getChildren().get(0);
-		return classPathWidget.getText();
-	}
+    public PomWidget(ParentWidget parentWidget, String inputText) throws Exception {
+        super(parentWidget, inputText);
+
+        pomFile = new File(parsePomFile(inputText));
+        if (FILE_UTIL.exists(pomFile)) {
+            List<String> dependencies = new ArrayList<String>();
+            try {
+                dependencies.addAll(MAVEN_OUTPUT_DIR_RESOLVER.resolve(pomFile));
+                dependencies.addAll(MAVEN_DEPENDENCY_RESOLVER.resolve(pomFile));
+                CLASSPATH_WIDGET_FACTORY.build(this, dependencies);
+            }
+            catch (MavenException err) {
+                errorMessage = err.getMessage();
+            }
+        }
+    }
 
 
-	@Override
-	public String render() throws Exception {
-		RawHtml titleElement = createTitleElement("Maven POM: " + pomFile);
-		RawHtml bodyElement = new RawHtml(childHtml());
-		boolean expanded = false;
-		if (errorMessage != null) {
-			bodyElement = new RawHtml("<pre>" + errorMessage + "</pre>");
-			expanded = true;
-		}
-		else if (!FILE_UTIL.exists(pomFile)) {
-			titleElement = createTitleElement("Maven POM could NOT be found: " + pomFile);
-		}
-		HtmlElement html = makeCollapsableSection(titleElement, bodyElement, expanded);
-		return html.html();
-	}
+    @Override
+    public String getText() throws Exception {
+        ClasspathWidget classPathWidget = (ClasspathWidget) getChildren().get(0);
+        return classPathWidget.getText();
+    }
 
 
-	private RawHtml createTitleElement(String text) {
-		return new RawHtml("<b>" + HtmlUtil.metaText("&nbsp;" + text) + "</b>");
-	}
+    @Override
+    public String render() throws Exception {
+        RawHtml titleElement = createTitleElement("Maven POM: " + pomFile);
+        RawHtml bodyElement = new RawHtml(childHtml());
+        boolean expanded = false;
+        if (errorMessage != null) {
+            bodyElement = new RawHtml("<pre>" + errorMessage + "</pre>");
+            expanded = true;
+        } else if (!FILE_UTIL.exists(pomFile)) {
+            titleElement = createTitleElement("Maven POM could NOT be found: " + pomFile);
+        }
+        HtmlElement html = makeCollapsableSection(titleElement, bodyElement, expanded);
+        return html.html();
+    }
 
 
-	private String getFilePathSeparator() {
-		return isWindows() ? "\\" : "/";
-	}
+    private RawHtml createTitleElement(String text) {
+        return new RawHtml("<b>" + HtmlUtil.metaText("&nbsp;" + text) + "</b>");
+    }
 
 
-	private String imageSrc(boolean expanded) {
-		if (expanded)
-			return collapsableOpenImg;
-		else
-			return collapsableClosedImg;
-	}
+    private String imageSrc(boolean expanded) {
+        if (expanded)
+            return collapsableOpenImg;
+        else
+            return collapsableClosedImg;
+    }
 
 
-	private boolean isWindows() {
-		return System.getProperty("os.name").toLowerCase().contains("windows");
-	}
+    private HtmlTag makeCollapsableDiv(boolean expanded) {
+        if (expanded)
+            return HtmlUtil.makeDivTag(collapsableOpenCss);
+        else
+            return HtmlUtil.makeDivTag(collapsableClosedCss);
+    }
 
 
-	private HtmlTag makeCollapsableDiv(boolean expanded) {
-		if (expanded)
-			return HtmlUtil.makeDivTag(collapsableOpenCss);
-		else
-			return HtmlUtil.makeDivTag(collapsableClosedCss);
-	}
+    private HtmlElement makeCollapsableSection(HtmlElement title, HtmlElement content, boolean expanded) {
+        String id = "maven-pom";
+
+        HtmlTag outerDiv = HtmlUtil.makeDivTag(cssClass);
+
+        HtmlTag image = new HtmlTag("img");
+        image.addAttribute("src", imageSrc(expanded));
+        image.addAttribute("class", "left");
+        image.addAttribute("id", "img" + id);
+
+        HtmlTag anchor = new HtmlTag("a", image);
+        anchor.addAttribute("href", "javascript:toggleCollapsable('" + id + "');");
+
+        outerDiv.add(anchor);
+        outerDiv.add(title);
+
+        HtmlTag collapsablediv = makeCollapsableDiv(expanded);
+        collapsablediv.addAttribute("id", id);
+        collapsablediv.add(content);
+        outerDiv.add(collapsablediv);
+
+        return outerDiv;
+    }
 
 
-	private HtmlElement makeCollapsableSection(HtmlElement title, HtmlElement content, boolean expanded) {
-		String id = "maven-pom";
+    private String parsePomFile(String input) {
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
+    }
 
-		HtmlTag outerDiv = HtmlUtil.makeDivTag(cssClass);
-
-		HtmlTag image = new HtmlTag("img");
-		image.addAttribute("src", imageSrc(expanded));
-		image.addAttribute("class", "left");
-		image.addAttribute("id", "img" + id);
-
-		HtmlTag anchor = new HtmlTag("a", image);
-		anchor.addAttribute("href", "javascript:toggleCollapsable('" + id + "');");
-
-		outerDiv.add(anchor);
-		outerDiv.add(title);
-
-		HtmlTag collapsablediv = makeCollapsableDiv(expanded);
-		collapsablediv.addAttribute("id", id);
-		collapsablediv.add(content);
-		outerDiv.add(collapsablediv);
-
-		return outerDiv;
-	}
-
-
-	private String parsePomFile(String input) {
-		Matcher matcher = pattern.matcher(input);
-		if (matcher.find()) {
-			return matcher.group(1);
-		}
-		return null;
-	}
-
-
-	private String parsePomParentDir(String input) {
-		String pomFile = parsePomFile(input);
-		return pomFile.substring(0, pomFile.indexOf("pom.xml"));
-	}
 }
