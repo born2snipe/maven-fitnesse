@@ -48,7 +48,7 @@ public class PomWidget extends ClasspathWidget {
 	private static final String collapsableClosedImg = "/files/images/collapsableClosed.gif";
 	private static final String collapsableOpenCss = "collapsable";
 	private static final String collapsableOpenImg = "/files/images/collapsableOpen.gif";
-	
+
 	private File pomFile;
 	private String cssClass = "collapse_rim";
 	private String errorMessage;

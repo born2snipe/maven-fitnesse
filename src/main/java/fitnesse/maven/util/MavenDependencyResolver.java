@@ -18,48 +18,42 @@ import java.util.List;
 
 public class MavenDependencyResolver extends AbstractMavenResolver {
 
-    public MavenDependencyResolver() {
-        this(new CommandShell(), new DependencyCache());
-    }
+	public MavenDependencyResolver() {
+		this(new CommandShell(), new DependencyCache());
+	}
 
 
-    protected MavenDependencyResolver(CommandShell commandShell, DependencyCache dependencyCache) {
-        super(dependencyCache, commandShell);
-    }
+	protected MavenDependencyResolver(CommandShell commandShell, DependencyCache dependencyCache) {
+		super(dependencyCache, commandShell);
+	}
 
 
-    protected List<String> mvnArgs() {
-        return Arrays.asList("dependency:build-classpath", "-DincludeScope=test");
-    }
-
-    protected List<String> handleConsoleOutput(String consoleOutput) {
-        if (buildFailure(consoleOutput)) {
-            throw new MavenException(consoleOutput);
-        }
-        return Arrays.asList(grabClassPathFromConsoleOutput(consoleOutput).split(getPathSeperator()));
-    }
+	protected List<String> handleConsoleOutput(String consoleOutput) {
+		return Arrays.asList(grabClassPathFromConsoleOutput(consoleOutput).split(getPathSeperator()));
+	}
 
 
-    private boolean buildFailure(String consoleOutput) {
-        return consoleOutput.contains("MavenExecutionException") || consoleOutput.contains("BUILD ERROR");
-    }
+	protected List<String> mvnArgs() {
+		return Arrays.asList("dependency:build-classpath", "-DincludeScope=test");
+	}
 
 
-    private String grabClassPathFromConsoleOutput(String output) {
-        List<String> lines = Arrays.asList(output.split("\n"));
-        for (int i = 0; i < lines.size(); i++) {
-            if (lines.get(i).contains("Dependencies classpath")) {
-                return lines.get(i + 1).trim();
-            }
-        }
-        return "";
-    }
+	private String getPathSeperator() {
+		if (isWindows()) {
+			return ";";
+		}
+		return ":";
+	}
 
-    private String getPathSeperator() {
-        if (isWindows()) {
-            return ";";
-        }
-        return ":";
-    }
+
+	private String grabClassPathFromConsoleOutput(String output) {
+		List<String> lines = Arrays.asList(output.split("\n"));
+		for (int i = 0; i < lines.size(); i++) {
+			if (lines.get(i).contains("Dependencies classpath")) {
+				return lines.get(i + 1).trim();
+			}
+		}
+		return "";
+	}
 
 }

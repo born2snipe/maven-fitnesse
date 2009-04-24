@@ -1,11 +1,11 @@
 /**
  * Copyright to the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at:
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is
  * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and limitations under the License.
@@ -33,7 +33,11 @@ public abstract class AbstractMavenResolver {
         List<String> args = new ArrayList<String>();
         args.add(mvnCommand());
         args.addAll(mvnArgs());
-        List<String> dependencies = handleConsoleOutput(commandShell.execute(pomFile.getParentFile(), args.toArray(new String[0])));
+		String consoleOutput = commandShell.execute(pomFile.getParentFile(), args.toArray(new String[0]));
+	    if (buildFailure(consoleOutput)) {
+		    throw new MavenException(consoleOutput);
+	    }
+        List<String> dependencies = handleConsoleOutput(consoleOutput);
         dependencyCache.cache(pomFile, dependencies);
         return dependencies;
     }
@@ -52,4 +56,9 @@ public abstract class AbstractMavenResolver {
     protected boolean isWindows() {
         return System.getProperty("os.name").toLowerCase().contains("windows");
     }
+
+
+	private boolean buildFailure(String consoleOutput) {
+		return consoleOutput.contains("MavenExecutionException") || consoleOutput.contains("BUILD ERROR");
+	}
 }
