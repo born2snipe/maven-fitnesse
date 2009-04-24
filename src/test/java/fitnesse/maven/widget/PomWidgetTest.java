@@ -48,8 +48,25 @@ public class PomWidgetTest extends TestCase {
         PomWidget.MAVEN_POM_RESOLVER = mavenPomResolver;
     }
 
+    public void test_pomFileCouldNotBeResolved() throws Exception {
+        File pomFile = new File("/blah/pom.xml");
 
-    public void test_resolverThrowsException() throws Exception {
+        when(mavenPomResolver.resolve(pomFile)).thenReturn(null);
+
+        PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
+
+        String expectedHtml = "<div class=\"collapse_rim\">" +
+		        "<a href=\"javascript:toggleCollapsable('maven-pom-null');\">" +
+		        "<img src=\"/files/images/collapsableClosed.gif\" class=\"left\" id=\"imgmaven-pom-null\"/></a>" +
+		        "<b><span class=\"meta\">&nbsp;Maven POM could NOT be found: /blah/pom.xml</span></b>" +
+		        "<div class=\"hidden\" id=\"maven-pom-null\"></div></div>";
+
+        assertEquals(expectedHtml, removeEndingWhitespace(widget.render()));
+	    verifyZeroInteractions(mavenDependencyResolver);
+	    verifyZeroInteractions(mavenOutputDirectoryResolver);
+    }
+
+    public void test_dependencyResolverThrowsException() throws Exception {
         File pomFile = new File("/blah/pom.xml");
 
         when(mavenPomResolver.resolve(pomFile)).thenReturn(pomFile);
@@ -111,7 +128,7 @@ public class PomWidgetTest extends TestCase {
 
 
     private String removeEndingWhitespace(String value) {
-        return value.replaceAll("\\s{2,10}", "").replaceAll("\n", "");
+        return value.replaceAll("\\s{2,10}", "").replaceAll("\n", "").replaceAll("\\\\", "/");
     }
 
 
