@@ -44,7 +44,6 @@ public class PomWidget extends ClasspathWidget {
     private static final Pattern pattern = Pattern.compile("^!pom (.*)", Pattern.CASE_INSENSITIVE);
     private static final String collapsableClosedCss = "hidden";
     private static final String collapsableClosedImg = "/files/images/collapsableClosed.gif";
-    private static final String collapsableInvisibleCss = "invisible";
     private static final String collapsableOpenCss = "collapsable";
     private static final String collapsableOpenImg = "/files/images/collapsableOpen.gif";
 
@@ -63,14 +62,19 @@ public class PomWidget extends ClasspathWidget {
 
         pomFile = new File(parsePomFile(inputText));
         if (FILE_UTIL.exists(pomFile)) {
-            List<String> dependencies = new ArrayList<String>();
-            try {
-                dependencies.addAll(MAVEN_OUTPUT_DIR_RESOLVER.resolve(pomFile));
-                dependencies.addAll(MAVEN_DEPENDENCY_RESOLVER.resolve(pomFile));
-                CLASSPATH_WIDGET_FACTORY.build(this, dependencies);
+            if (FILE_UTIL.isDirectory(pomFile)) {
+                pomFile = new File(pomFile, "pom.xml");
             }
-            catch (MavenException err) {
-                errorMessage = err.getMessage();
+            if (FILE_UTIL.exists(pomFile)) {
+                List<String> dependencies = new ArrayList<String>();
+                try {
+                    dependencies.addAll(MAVEN_OUTPUT_DIR_RESOLVER.resolve(pomFile));
+                    dependencies.addAll(MAVEN_DEPENDENCY_RESOLVER.resolve(pomFile));
+                    CLASSPATH_WIDGET_FACTORY.build(this, dependencies);
+                }
+                catch (MavenException err) {
+                    errorMessage = err.getMessage();
+                }
             }
         }
     }

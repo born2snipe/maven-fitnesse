@@ -93,7 +93,7 @@ public class PomWidgetTest extends TestCase {
     }
 
 
-    public void test_singleDependency() throws Exception {
+    public void test_singleDependency_PomFile() throws Exception {
         File pomFile = new File("/blah/pom.xml");
         List<String> dependencies = Arrays.asList("junit.jar");
 
@@ -105,6 +105,44 @@ public class PomWidgetTest extends TestCase {
 
         verify(classpathWidgetFactory).build(widget, Arrays.asList("/target/classes", "junit.jar"));
         verifyNoMoreInteractions(classpathWidgetFactory);
+    }
+
+    public void test_singleDependency_PomParentDir_PomFound() throws Exception {
+        File dir = new File("/blah");
+        File pomFile = new File(dir, "/pom.xml");
+        List<String> dependencies = Arrays.asList("junit.jar");
+
+        when(fileUtil.exists(dir)).thenReturn(true);
+        when(fileUtil.isDirectory(dir)).thenReturn(true);
+        when(fileUtil.exists(pomFile)).thenReturn(true);
+        when(mavenDependencyResolver.resolve(pomFile)).thenReturn(dependencies);
+        when(mavenOutputDirectoryResolver.resolve(pomFile)).thenReturn(Arrays.asList("/target/classes"));
+
+        PomWidget widget = new PomWidget(parentWidget, "!pom /blah");
+
+        verify(classpathWidgetFactory).build(widget, Arrays.asList("/target/classes", "junit.jar"));
+        verifyNoMoreInteractions(classpathWidgetFactory);
+    }
+
+    public void test_singleDependency_PomParentDir_PomNotFound() throws Exception {
+        File dir = new File("/blah");
+        File pomFile = new File(dir, "/pom.xml");
+
+        when(fileUtil.exists(dir)).thenReturn(true);
+        when(fileUtil.isDirectory(dir)).thenReturn(true);
+        when(fileUtil.exists(pomFile)).thenReturn(false);
+
+        PomWidget widget = new PomWidget(parentWidget, "!pom /blah");
+
+        verifyNoMoreInteractions(classpathWidgetFactory);
+
+        String expectedHtml = "<div class=\"collapse_rim\">" +
+                "<a href=\"javascript:toggleCollapsable('maven-pom');\">" +
+                "<img src=\"/files/images/collapsableClosed.gif\" class=\"left\" id=\"imgmaven-pom\"/></a>" +
+                "<b><span class=\"meta\">&nbsp;Maven POM could NOT be found: /blah/pom.xml</span></b>" +
+                "<div class=\"hidden\" id=\"maven-pom\"></div></div>";
+
+        assertEquals(expectedHtml, removeEndingWhitespace(widget.render()));
     }
 
 

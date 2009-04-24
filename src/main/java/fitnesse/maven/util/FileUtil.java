@@ -23,4 +23,8 @@ public class FileUtil {
     public long lastModified(File file) {
         return file.lastModified();
     }
+
+    public boolean isDirectory(File file) {
+        return file.isDirectory();
+    }
 }
