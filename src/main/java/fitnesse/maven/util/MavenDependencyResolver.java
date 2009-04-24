@@ -12,15 +12,11 @@
  */
 package fitnesse.maven.util;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 
-public class MavenDependencyResolver {
-
-    private CommandShell commandShell;
-    private DependencyCache dependencyCache;
+public class MavenDependencyResolver extends AbstractMavenResolver {
 
     public MavenDependencyResolver() {
         this(new CommandShell(), new DependencyCache());
@@ -28,22 +24,19 @@ public class MavenDependencyResolver {
 
 
     protected MavenDependencyResolver(CommandShell commandShell, DependencyCache dependencyCache) {
-        this.commandShell = commandShell;
-        this.dependencyCache = dependencyCache;
+        super(dependencyCache, commandShell);
     }
 
-    public List<String> resolve(File pomFile) {
-        if (!dependencyCache.hasChanged(pomFile)) {
-            return dependencyCache.getDependencies(pomFile);
-        }
-        String consoleOutput = commandShell.execute(pomFile.getParentFile(), mvnCommand(), "dependency:build-classpath", "-DincludeScope=test");
+
+    protected List<String> mvnArgs() {
+        return Arrays.asList("dependency:build-classpath", "-DincludeScope=test");
+    }
+
+    protected List<String> handleConsoleOutput(String consoleOutput) {
         if (buildFailure(consoleOutput)) {
             throw new MavenException(consoleOutput);
         }
-        String pathText = grabClassPathFromConsoleOutput(consoleOutput);
-        List<String> dependencies = Arrays.asList(pathText.split(getPathSeperator()));
-        dependencyCache.cache(pomFile, dependencies);
-        return dependencies;
+        return Arrays.asList(grabClassPathFromConsoleOutput(consoleOutput).split(getPathSeperator()));
     }
 
 
@@ -62,13 +55,6 @@ public class MavenDependencyResolver {
         return "";
     }
 
-    private String mvnCommand() {
-        if (isWindows()) {
-            return "mvn.bat";
-        }
-        return "mvn";
-    }
-
     private String getPathSeperator() {
         if (isWindows()) {
             return ";";
@@ -76,7 +62,4 @@ public class MavenDependencyResolver {
         return ":";
     }
 
-    private boolean isWindows() {
-        return System.getProperty("os.name").toLowerCase().contains("windows");
-    }
 }

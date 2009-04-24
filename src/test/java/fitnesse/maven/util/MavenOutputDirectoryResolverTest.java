@@ -1,11 +1,11 @@
 /**
  * Copyright to the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at:
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is
  * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and limitations under the License.
@@ -33,7 +33,7 @@ public class MavenOutputDirectoryResolverTest extends TestCase {
         originalOs = System.getProperty("os.name");
         shell = mock(CommandShell.class);
         cache = mock(DependencyCache.class);
-        resolver = new MavenOutputDirectoryResolver(shell, cache);
+        resolver = new MavenOutputDirectoryResolver(cache, shell);
     }
 
     @Override
@@ -49,9 +49,11 @@ public class MavenOutputDirectoryResolverTest extends TestCase {
         when(cache.hasChanged(POM_FILE)).thenReturn(true);
         when(shell.execute(POM_FILE.getParentFile(), "mvn.bat", "help:effective-pom")).thenReturn(consoleOutput);
 
-        assertEquals(Arrays.asList("C:\\target\\classes", "C:\\target\\test-classes"), resolver.resolve(POM_FILE));
+        List<String> outputDirs = Arrays.asList("C:\\target\\classes", "C:\\target\\test-classes");
+        assertEquals(outputDirs, resolver.resolve(POM_FILE));
 
         verify(shell).execute(POM_FILE.getParentFile(), "mvn.bat", "help:effective-pom");
+        verify(cache).cache(POM_FILE, outputDirs);
     }
 
     public void test_resolve_NotCached_Unix() {
@@ -62,9 +64,11 @@ public class MavenOutputDirectoryResolverTest extends TestCase {
         when(cache.hasChanged(POM_FILE)).thenReturn(true);
         when(shell.execute(POM_FILE.getParentFile(), "mvn", "help:effective-pom")).thenReturn(consoleOutput);
 
-        assertEquals(Arrays.asList("/target/classes", "/target/test-classes"), resolver.resolve(POM_FILE));
+        List<String> outputDirs = Arrays.asList("/target/classes", "/target/test-classes");
+        assertEquals(outputDirs, resolver.resolve(POM_FILE));
 
         verify(shell).execute(POM_FILE.getParentFile(), "mvn", "help:effective-pom");
+        verify(cache).cache(POM_FILE, outputDirs);
     }
 
     public void test_execute_Cached() {
