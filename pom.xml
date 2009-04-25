@@ -40,6 +40,7 @@
             <groupId>org.fitnesse</groupId>
             <artifactId>fitnesse</artifactId>
             <version>20080812</version>
+            <scope>provided</scope>
         </dependency>
 
     </dependencies>
@@ -96,6 +97,26 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>assembly</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+
         </plugins>
     </build>
 
@@ -111,6 +132,11 @@
             <releases>
                 <enabled>true</enabled>
             </releases>
+        </pluginRepository>
+
+        <pluginRepository>
+            <id>anydoby.com</id>
+            <url>http://anydoby.com/maven</url>
         </pluginRepository>
 
     </pluginRepositories>
