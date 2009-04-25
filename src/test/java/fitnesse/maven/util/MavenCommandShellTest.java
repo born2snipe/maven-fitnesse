@@ -1,0 +1,58 @@
+/**
+ * Copyright to the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at:
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is
+ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and limitations under the License.
+ */
+package fitnesse.maven.util;
+
+import fitnesse.maven.PomFile;
+import junit.framework.TestCase;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+
+
+public class MavenCommandShellTest extends TestCase {
+    private static final PomFile POM_FILE = new PomFile(new File("blah/pom.xml"));
+    private CommandShell shell;
+    private MavenCommandShell mvnShell;
+    private String originalOs;
+
+    protected void setUp() throws Exception {
+        super.setUp();
+        shell = mock(CommandShell.class);
+        mvnShell = new MavenCommandShell(shell);
+
+        originalOs = System.getProperty("os.name");
+        System.setProperty("os.name", "mac");
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        System.setProperty("os.name", originalOs);
+    }
+
+    public void test_execute_Unix() {
+        when(shell.execute(POM_FILE.getDirectory(), "mvn", "clean", "install")).thenReturn("output");
+
+        assertEquals("output", mvnShell.execute(POM_FILE, "clean", "install"));
+    }
+
+    public void test_execute_Windows() {
+        System.setProperty("os.name", "windows");
+
+        when(shell.execute(POM_FILE.getDirectory(), "mvn.bat", "clean", "install")).thenReturn("windows output");
+
+        assertEquals("windows output", mvnShell.execute(POM_FILE, "clean", "install"));
+    }
+
+
+}
