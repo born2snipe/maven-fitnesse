@@ -19,8 +19,8 @@ import java.util.regex.Pattern;
 
 
 public class MavenOutputDirectoryResolver extends AbstractMavenResolver {
-    private static Pattern TEST_OUTPUT = Pattern.compile("<testOutputDirectory>(.+)</testOutputDirectory>");
-    private static Pattern OUTPUT = Pattern.compile("<outputDirectory>(.+)</outputDirectory>");
+    private static final Pattern TEST_OUTPUT = Pattern.compile("<testOutputDirectory>(.+)</testOutputDirectory>");
+    private static final Pattern OUTPUT = Pattern.compile("<outputDirectory>(.+)</outputDirectory>");
 
     public MavenOutputDirectoryResolver() {
         this(new DependencyCache(), new CommandShell());

@@ -29,12 +29,17 @@ public class MavenPomResolver {
     }
 
     public PomFile resolve(File pomFile) {
+        File file = getPomFile(pomFile);
+        return file == null ? null : new PomFile(file);
+    }
+
+    private File getPomFile(File pomFile) {
         if (fileUtil.exists(pomFile)) {
             if (fileUtil.isDirectory(pomFile)) {
                 File pom = new File(pomFile, "pom.xml");
-                return fileUtil.exists(pom) ? new PomFile(pom) : null;
+                return fileUtil.exists(pom) ? pom : null;
             }
-            return new PomFile(pomFile);
+            return pomFile;
         }
         return null;
     }
