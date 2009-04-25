@@ -12,7 +12,8 @@
  */
 package fitnesse.maven.util;
 
-import java.io.File;
+import fitnesse.maven.PomFile;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,19 +27,19 @@ public abstract class AbstractMavenResolver {
         this.commandShell = commandShell;
     }
 
-    public List<String> resolve(File pomFile) {
-        if (!dependencyCache.hasChanged(pomFile)) {
-            return dependencyCache.getDependencies(pomFile);
+    public List<String> resolve(PomFile pomFile) {
+        if (!dependencyCache.hasChanged(pomFile.getFile())) {
+            return dependencyCache.getDependencies(pomFile.getFile());
         }
         List<String> args = new ArrayList<String>();
         args.add(mvnCommand());
         args.addAll(mvnArgs());
-		String consoleOutput = commandShell.execute(pomFile.getParentFile(), args.toArray(new String[0]));
-	    if (buildFailure(consoleOutput)) {
-		    throw new MavenException(consoleOutput);
-	    }
+        String consoleOutput = commandShell.execute(pomFile.getFile().getParentFile(), args.toArray(new String[0]));
+        if (buildFailure(consoleOutput)) {
+            throw new MavenException(consoleOutput);
+        }
         List<String> dependencies = handleConsoleOutput(consoleOutput);
-        dependencyCache.cache(pomFile, dependencies);
+        dependencyCache.cache(pomFile.getFile(), dependencies);
         return dependencies;
     }
 
@@ -58,7 +59,7 @@ public abstract class AbstractMavenResolver {
     }
 
 
-	private boolean buildFailure(String consoleOutput) {
-		return consoleOutput.contains("MavenExecutionException") || consoleOutput.contains("BUILD ERROR");
-	}
+    private boolean buildFailure(String consoleOutput) {
+        return consoleOutput.contains("MavenExecutionException") || consoleOutput.contains("BUILD ERROR");
+    }
 }

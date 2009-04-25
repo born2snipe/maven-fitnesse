@@ -68,7 +68,7 @@ public class PomWidgetTest extends TestCase {
 
     public void test_dependencyResolverThrowsException() throws Exception {
         when(mavenPomResolver.resolve(POM_FILE.getFile())).thenReturn(POM_FILE);
-        when(mavenDependencyResolver.resolve(POM_FILE.getFile())).thenThrow(new MavenException("error"));
+        when(mavenDependencyResolver.resolve(POM_FILE)).thenThrow(new MavenException("error"));
         when(idGenerator.generate()).thenReturn("1");
 
         PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
@@ -89,8 +89,8 @@ public class PomWidgetTest extends TestCase {
         List<String> dependencies = Arrays.asList("junit.jar", "jmock.jar");
 
         when(mavenPomResolver.resolve(POM_FILE.getFile())).thenReturn(POM_FILE);
-        when(mavenOutputDirectoryResolver.resolve(POM_FILE.getFile())).thenReturn(Arrays.asList("/target/classes"));
-        when(mavenDependencyResolver.resolve(POM_FILE.getFile())).thenReturn(dependencies);
+        when(mavenOutputDirectoryResolver.resolve(POM_FILE)).thenReturn(Arrays.asList("/target/classes"));
+        when(mavenDependencyResolver.resolve(POM_FILE)).thenReturn(dependencies);
         when(idGenerator.generate()).thenReturn("1");
 
         PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
@@ -113,8 +113,8 @@ public class PomWidgetTest extends TestCase {
         List<String> dependencies = Arrays.asList("junit.jar");
 
         when(mavenPomResolver.resolve(POM_FILE.getFile())).thenReturn(POM_FILE);
-        when(mavenDependencyResolver.resolve(POM_FILE.getFile())).thenReturn(dependencies);
-        when(mavenOutputDirectoryResolver.resolve(POM_FILE.getFile())).thenReturn(Arrays.asList("/target/classes"));
+        when(mavenDependencyResolver.resolve(POM_FILE)).thenReturn(dependencies);
+        when(mavenOutputDirectoryResolver.resolve(POM_FILE)).thenReturn(Arrays.asList("/target/classes"));
 
         PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
 
