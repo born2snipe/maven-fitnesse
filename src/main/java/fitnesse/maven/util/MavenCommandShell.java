@@ -47,4 +47,12 @@ public class MavenCommandShell {
     protected boolean isWindows() {
         return System.getProperty("os.name").toLowerCase().contains("windows");
     }
+
+    public Object execute(PomFile pomFile, OutputHandler handler, String... args) {
+        return handler.handle(execute(pomFile, args));
+    }
+
+    public interface OutputHandler {
+        public Object handle(String consoleOutput);
+    }
 }

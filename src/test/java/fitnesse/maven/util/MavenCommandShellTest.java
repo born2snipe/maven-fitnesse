@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.util.Arrays;
 
 
 public class MavenCommandShellTest extends TestCase {
@@ -38,6 +39,18 @@ public class MavenCommandShellTest extends TestCase {
     @Override
     protected void tearDown() throws Exception {
         System.setProperty("os.name", originalOs);
+    }
+
+    public void test_execute_WithOutputHandler() {
+        when(shell.execute(POM_FILE.getDirectory(), "mvn", "clean", "install")).thenReturn("1,2,3");
+
+        MavenCommandShell.OutputHandler handler = new MavenCommandShell.OutputHandler() {
+            public Object handle(String consoleOutput) {
+                return Arrays.asList(consoleOutput.split(","));
+            }
+        };
+
+        assertEquals(Arrays.asList("1", "2", "3"), mvnShell.execute(POM_FILE, handler, "clean", "install"));
     }
 
     public void test_execute_Unix() {
