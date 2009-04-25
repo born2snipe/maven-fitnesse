@@ -21,6 +21,7 @@ import fitnesse.maven.util.MavenDependencyResolver;
 import fitnesse.maven.util.MavenException;
 import fitnesse.maven.util.MavenOutputDirectoryResolver;
 import fitnesse.maven.util.MavenPomResolver;
+import fitnesse.maven.PomFile;
 import fitnesse.wiki.PageData;
 import fitnesse.wikitext.WidgetBuilder;
 import fitnesse.wikitext.widgets.ClasspathWidget;
@@ -49,7 +50,7 @@ public class PomWidget extends ClasspathWidget {
 	private static final String collapsableOpenCss = "collapsable";
 	private static final String collapsableOpenImg = "/files/images/collapsableOpen.gif";
 
-	private File pomFile;
+	private PomFile pomFile;
 	private String cssClass = "collapse_rim";
 	private String errorMessage;
 	private String pomFileInput;
@@ -69,8 +70,8 @@ public class PomWidget extends ClasspathWidget {
 		if (pomFile != null) {
 			List<String> dependencies = new ArrayList<String>();
 			try {
-				dependencies.addAll(MAVEN_OUTPUT_DIR_RESOLVER.resolve(pomFile));
-				dependencies.addAll(MAVEN_DEPENDENCY_RESOLVER.resolve(pomFile));
+				dependencies.addAll(MAVEN_OUTPUT_DIR_RESOLVER.resolve(pomFile.getFile()));
+				dependencies.addAll(MAVEN_DEPENDENCY_RESOLVER.resolve(pomFile.getFile()));
 				CLASSPATH_WIDGET_FACTORY.build(this, dependencies);
 			}
 			catch (MavenException err) {
