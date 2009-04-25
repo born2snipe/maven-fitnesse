@@ -32,6 +32,10 @@ public class PomFile {
         return file;
     }
 
+    public File getDirectory() {
+        return getFile().getParentFile();
+    }
+
     public PomFile getParent() {
         return parent;
     }

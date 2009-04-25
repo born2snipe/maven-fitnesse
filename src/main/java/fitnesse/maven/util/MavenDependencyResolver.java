@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class MavenDependencyResolver extends AbstractMavenResolver {
+public class MavenDependencyResolver extends AbstractMavenDependencyResolver {
 
 	public MavenDependencyResolver() {
 		this(new CommandShell(), new DependencyCache());

@@ -18,11 +18,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public abstract class AbstractMavenResolver {
+public abstract class AbstractMavenDependencyResolver {
     protected CommandShell commandShell;
     protected DependencyCache dependencyCache;
 
-    protected AbstractMavenResolver(DependencyCache dependencyCache, CommandShell commandShell) {
+    protected AbstractMavenDependencyResolver(DependencyCache dependencyCache, CommandShell commandShell) {
         this.dependencyCache = dependencyCache;
         this.commandShell = commandShell;
     }
@@ -34,7 +34,7 @@ public abstract class AbstractMavenResolver {
         List<String> args = new ArrayList<String>();
         args.add(mvnCommand());
         args.addAll(mvnArgs());
-        String consoleOutput = commandShell.execute(pomFile.getFile().getParentFile(), args.toArray(new String[0]));
+        String consoleOutput = commandShell.execute(pomFile.getDirectory(), args.toArray(new String[0]));
         if (buildFailure(consoleOutput)) {
             throw new MavenException(consoleOutput);
         }

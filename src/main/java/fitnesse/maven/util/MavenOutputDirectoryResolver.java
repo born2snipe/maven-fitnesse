@@ -18,7 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class MavenOutputDirectoryResolver extends AbstractMavenResolver {
+public class MavenOutputDirectoryResolver extends AbstractMavenDependencyResolver {
     private static final Pattern TEST_OUTPUT = Pattern.compile("<testOutputDirectory>(.+)</testOutputDirectory>");
     private static final Pattern OUTPUT = Pattern.compile("<outputDirectory>(.+)</outputDirectory>");
 
