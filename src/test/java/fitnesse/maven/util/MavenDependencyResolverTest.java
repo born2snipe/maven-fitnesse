@@ -45,21 +45,17 @@ public class MavenDependencyResolverTest extends TestCase {
     private DependencyCache dependencyCache;
 
     private MavenDependencyResolver resolver;
-    private String originalOs;
+    private Sys sys;
 
 
     protected void setUp() throws Exception {
         super.setUp();
-        originalOs = System.getProperty("os.name");
+        sys = mock(Sys.class);
         commandShell = mock(MavenCommandShell.class);
         dependencyCache = mock(DependencyCache.class);
-        resolver = new MavenDependencyResolver(commandShell, dependencyCache);
+        resolver = new MavenDependencyResolver(commandShell, dependencyCache, sys);
     }
 
-
-    protected void tearDown() {
-        System.setProperty("os.name", originalOs);
-    }
 
     public void test_UnresolvableDependency() {
         String consoleOutput = "[INFO] Scanning for projects...\n" +
@@ -112,7 +108,7 @@ public class MavenDependencyResolverTest extends TestCase {
                 "[INFO] ------------------------------------------------------------------------";
 
 
-        System.setProperty("os.name", "windows");
+        when(sys.isWindows()).thenReturn(true);
 
         when(dependencyCache.hasChanged(POM_FILE.getFile())).thenReturn(true);
         when(commandShell.execute(POM_FILE, "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
@@ -219,7 +215,7 @@ public class MavenDependencyResolverTest extends TestCase {
                 "[INFO] Final Memory: 1M/508M\n" +
                 "[INFO] ------------------------------------------------------------------------";
 
-        System.setProperty("os.name", "windows");
+        when(sys.isWindows()).thenReturn(true);
 
         when(dependencyCache.hasChanged(POM_FILE.getFile())).thenReturn(true);
         when(commandShell.execute(POM_FILE, "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
@@ -243,7 +239,7 @@ public class MavenDependencyResolverTest extends TestCase {
 
 
     public void test_multipleDependencies_NotCached_Windows() {
-        System.setProperty("os.name", "windows");
+        when(sys.isWindows()).thenReturn(true);
 
         String consoleOutput = createMavenOutput(";", "c:/users/common/classworlds-1.1.jar", "/junit.jar");
 
@@ -258,7 +254,7 @@ public class MavenDependencyResolverTest extends TestCase {
 
 
     public void test_multipleDependencies_NotCached_Unix() {
-        System.setProperty("os.name", "mac");
+        when(sys.isWindows()).thenReturn(false);
 
         String consoleOutput = createMavenOutput(":", "/classworlds-1.1.jar", "/junit.jar");
 
@@ -273,7 +269,7 @@ public class MavenDependencyResolverTest extends TestCase {
 
 
     public void test_singleDependency_NotCached() {
-        System.setProperty("os.name", "mac");
+        when(sys.isWindows()).thenReturn(false);
 
         String consoleOutput = createMavenOutput(";", "/classworlds-1.1.jar");
 

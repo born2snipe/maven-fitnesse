@@ -17,14 +17,16 @@ import java.util.List;
 
 
 public class MavenDependencyResolver extends AbstractMavenDependencyResolver {
+    private Sys sys;
 
     public MavenDependencyResolver() {
-        this(new MavenCommandShell(), new DependencyCache());
+        this(new MavenCommandShell(), new DependencyCache(), new Sys());
     }
 
 
-    protected MavenDependencyResolver(MavenCommandShell commandShell, DependencyCache dependencyCache) {
+    protected MavenDependencyResolver(MavenCommandShell commandShell, DependencyCache dependencyCache, Sys sys) {
         super(dependencyCache, commandShell);
+        this.sys = sys;
     }
 
 
@@ -39,7 +41,7 @@ public class MavenDependencyResolver extends AbstractMavenDependencyResolver {
 
 
     private String getPathSeperator() {
-        if (isWindows()) {
+        if (sys.isWindows()) {
             return ";";
         }
         return ":";

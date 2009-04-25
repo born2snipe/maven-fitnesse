@@ -27,21 +27,13 @@ public class MavenOutputDirectoryResolverTest extends TestCase {
     private MavenCommandShell shell;
     private DependencyCache cache;
     private MavenOutputDirectoryResolver resolver;
-    private String originalOs;
 
 
     protected void setUp() throws Exception {
         super.setUp();
-        originalOs = System.getProperty("os.name");
         shell = mock(MavenCommandShell.class);
         cache = mock(DependencyCache.class);
         resolver = new MavenOutputDirectoryResolver(cache, shell);
-    }
-
-
-    @Override
-    protected void tearDown() throws Exception {
-        System.setProperty("os.name", originalOs);
     }
 
 
@@ -113,8 +105,6 @@ public class MavenOutputDirectoryResolverTest extends TestCase {
                 "[INFO] Final Memory: 1M/508M\n" +
                 "[INFO] ------------------------------------------------------------------------\n";
 
-        System.setProperty("os.name", "windows");
-
         when(cache.hasChanged(POM_FILE.getFile())).thenReturn(true);
         when(shell.execute(POM_FILE, "help:effective-pom")).thenReturn(consoleOutput);
 
@@ -129,8 +119,6 @@ public class MavenOutputDirectoryResolverTest extends TestCase {
 
 
     public void test_resolve_NotCached_Windows() {
-        System.setProperty("os.name", "windows");
-
         String consoleOutput = consoleOutput("C:\\target\\classes", "C:\\target\\test-classes");
 
         when(cache.hasChanged(POM_FILE.getFile())).thenReturn(true);
@@ -145,8 +133,6 @@ public class MavenOutputDirectoryResolverTest extends TestCase {
 
 
     public void test_resolve_NotCached_Unix() {
-        System.setProperty("os.name", "mac");
-
         String consoleOutput = consoleOutput("/target/classes", "/target/test-classes");
 
         when(cache.hasChanged(POM_FILE.getFile())).thenReturn(true);

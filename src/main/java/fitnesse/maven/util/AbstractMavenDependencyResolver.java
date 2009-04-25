@@ -18,8 +18,8 @@ import java.util.List;
 
 
 public abstract class AbstractMavenDependencyResolver {
-    protected MavenCommandShell commandShell;
-    protected DependencyCache dependencyCache;
+    private MavenCommandShell commandShell;
+    private DependencyCache dependencyCache;
 
     protected AbstractMavenDependencyResolver(DependencyCache dependencyCache, MavenCommandShell commandShell) {
         this.dependencyCache = dependencyCache;
@@ -42,11 +42,6 @@ public abstract class AbstractMavenDependencyResolver {
     protected abstract List<String> mvnArgs();
 
     protected abstract List<String> handleConsoleOutput(String consoleOutput);
-
-    protected boolean isWindows() {
-        return System.getProperty("os.name").toLowerCase().contains("windows");
-    }
-
 
     private boolean buildFailure(String consoleOutput) {
         return consoleOutput.contains("MavenExecutionException") || consoleOutput.contains("BUILD ERROR");
