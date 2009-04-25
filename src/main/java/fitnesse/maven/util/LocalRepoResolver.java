@@ -15,32 +15,27 @@ package fitnesse.maven.util;
 import fitnesse.maven.PomFile;
 
 import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
-public class MavenPomResolver {
-    private FileUtil fileUtil;
+public class LocalRepoResolver {
+    private static final Pattern LOCAL_REPO_PATTERN = Pattern.compile("<localRepository>(.+)</localRepository>");
+    private MavenCommandShell shell;
 
-    public MavenPomResolver() {
-        this(new FileUtil());
+    public LocalRepoResolver() {
+        this(new MavenCommandShell());
     }
 
-    protected MavenPomResolver(FileUtil fileUtil) {
-        this.fileUtil = fileUtil;
+    protected LocalRepoResolver(MavenCommandShell shell) {
+        this.shell = shell;
     }
 
-    public PomFile resolve(File pomFile) {
-        File file = getPomFile(pomFile);
-        return file == null ? null : new PomFile(file);
+    public File resolve(PomFile pomFile) {
+        String consoleOutput = shell.execute(pomFile, "help:effective-settings");
+        Matcher matcher = LOCAL_REPO_PATTERN.matcher(consoleOutput);
+        matcher.find();
+        return new File(matcher.group(1));
     }
 
-    private File getPomFile(File pomFile) {
-        if (fileUtil.exists(pomFile)) {
-            if (fileUtil.isDirectory(pomFile)) {
-                File pom = new File(pomFile, "pom.xml");
-                return fileUtil.exists(pom) ? pom : null;
-            }
-            return pomFile;
-        }
-        return null;
-    }
 }

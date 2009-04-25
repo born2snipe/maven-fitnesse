@@ -12,6 +12,7 @@
  */
 package fitnesse.maven.util;
 
+import fitnesse.maven.PomFile;
 import fitnesse.util.StringUtil;
 import junit.framework.TestCase;
 import static org.mockito.Mockito.*;
@@ -23,7 +24,7 @@ import java.util.List;
 
 
 public class MavenDependencyResolverTest extends TestCase {
-    private static final File POM_FILE = new File("pom.xml");
+    private static final PomFile POM_FILE = new PomFile(new File("pom.xml"));
     private static final String CONSOLE_OUTPUT = "[INFO] Scanning for projects...\n" +
             "[INFO] Searching repository for plugin with prefix: 'dependency'.\n" +
             "[INFO] ------------------------------------------------------------------------\n" +
@@ -40,25 +41,21 @@ public class MavenDependencyResolverTest extends TestCase {
             "[INFO] Finished at: Mon Apr 20 17:54:34 CDT 2009\n" +
             "[INFO] Final Memory: 20M/52M\n" +
             "[INFO] ------------------------------------------------------------------------\n";
-    private CommandShell commandShell;
+    private MavenCommandShell commandShell;
     private DependencyCache dependencyCache;
 
     private MavenDependencyResolver resolver;
-    private String originalOs;
+    private Sys sys;
 
 
     protected void setUp() throws Exception {
         super.setUp();
-        originalOs = System.getProperty("os.name");
-        commandShell = mock(CommandShell.class);
+        sys = mock(Sys.class);
+        commandShell = mock(MavenCommandShell.class);
         dependencyCache = mock(DependencyCache.class);
-        resolver = new MavenDependencyResolver(commandShell, dependencyCache);
+        resolver = new MavenDependencyResolver(commandShell, dependencyCache, sys);
     }
 
-
-    protected void tearDown() {
-        System.setProperty("os.name", originalOs);
-    }
 
     public void test_UnresolvableDependency() {
         String consoleOutput = "[INFO] Scanning for projects...\n" +
@@ -111,10 +108,10 @@ public class MavenDependencyResolverTest extends TestCase {
                 "[INFO] ------------------------------------------------------------------------";
 
 
-        System.setProperty("os.name", "windows");
+        when(sys.isWindows()).thenReturn(true);
 
-        when(dependencyCache.hasChanged(POM_FILE)).thenReturn(true);
-        when(commandShell.execute(POM_FILE.getParentFile(), "mvn.bat", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
+        when(dependencyCache.hasChanged(POM_FILE.getFile())).thenReturn(true);
+        when(commandShell.execute(POM_FILE, "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
 
         try {
             resolver.resolve(POM_FILE);
@@ -218,10 +215,10 @@ public class MavenDependencyResolverTest extends TestCase {
                 "[INFO] Final Memory: 1M/508M\n" +
                 "[INFO] ------------------------------------------------------------------------";
 
-        System.setProperty("os.name", "windows");
+        when(sys.isWindows()).thenReturn(true);
 
-        when(dependencyCache.hasChanged(POM_FILE)).thenReturn(true);
-        when(commandShell.execute(POM_FILE.getParentFile(), "mvn.bat", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
+        when(dependencyCache.hasChanged(POM_FILE.getFile())).thenReturn(true);
+        when(commandShell.execute(POM_FILE, "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
 
         try {
             resolver.resolve(POM_FILE);
@@ -234,55 +231,55 @@ public class MavenDependencyResolverTest extends TestCase {
     public void test_Cached() {
         List<String> dependencies = Arrays.asList("junit.jar");
 
-        when(dependencyCache.hasChanged(POM_FILE)).thenReturn(false);
-        when(dependencyCache.getDependencies(POM_FILE)).thenReturn(dependencies);
+        when(dependencyCache.hasChanged(POM_FILE.getFile())).thenReturn(false);
+        when(dependencyCache.getDependencies(POM_FILE.getFile())).thenReturn(dependencies);
 
         assertSame(dependencies, resolver.resolve(POM_FILE));
     }
 
 
     public void test_multipleDependencies_NotCached_Windows() {
-        System.setProperty("os.name", "windows");
+        when(sys.isWindows()).thenReturn(true);
 
         String consoleOutput = createMavenOutput(";", "c:/users/common/classworlds-1.1.jar", "/junit.jar");
 
-        when(dependencyCache.hasChanged(POM_FILE)).thenReturn(true);
-        when(commandShell.execute(POM_FILE.getParentFile(), "mvn.bat", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
+        when(dependencyCache.hasChanged(POM_FILE.getFile())).thenReturn(true);
+        when(commandShell.execute(POM_FILE, "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
 
         List<String> expectedDependencies = Arrays.asList("c:/users/common/classworlds-1.1.jar", "/junit.jar");
         assertEquals(expectedDependencies, resolver.resolve(POM_FILE));
 
-        verify(dependencyCache).cache(POM_FILE, expectedDependencies);
+        verify(dependencyCache).cache(POM_FILE.getFile(), expectedDependencies);
     }
 
 
     public void test_multipleDependencies_NotCached_Unix() {
-        System.setProperty("os.name", "mac");
+        when(sys.isWindows()).thenReturn(false);
 
         String consoleOutput = createMavenOutput(":", "/classworlds-1.1.jar", "/junit.jar");
 
-        when(dependencyCache.hasChanged(POM_FILE)).thenReturn(true);
-        when(commandShell.execute(POM_FILE.getParentFile(), "mvn", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
+        when(dependencyCache.hasChanged(POM_FILE.getFile())).thenReturn(true);
+        when(commandShell.execute(POM_FILE, "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
 
         List<String> expectedDependencies = Arrays.asList("/classworlds-1.1.jar", "/junit.jar");
         assertEquals(expectedDependencies, resolver.resolve(POM_FILE));
 
-        verify(dependencyCache).cache(POM_FILE, expectedDependencies);
+        verify(dependencyCache).cache(POM_FILE.getFile(), expectedDependencies);
     }
 
 
     public void test_singleDependency_NotCached() {
-        System.setProperty("os.name", "mac");
+        when(sys.isWindows()).thenReturn(false);
 
         String consoleOutput = createMavenOutput(";", "/classworlds-1.1.jar");
 
-        when(dependencyCache.hasChanged(POM_FILE)).thenReturn(true);
-        when(commandShell.execute(POM_FILE.getParentFile(), "mvn", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
+        when(dependencyCache.hasChanged(POM_FILE.getFile())).thenReturn(true);
+        when(commandShell.execute(POM_FILE, "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
 
         List<String> expectedDependencies = Arrays.asList("/classworlds-1.1.jar");
         assertEquals(expectedDependencies, resolver.resolve(POM_FILE));
 
-        verify(dependencyCache).cache(POM_FILE, expectedDependencies);
+        verify(dependencyCache).cache(POM_FILE.getFile(), expectedDependencies);
     }
 
 

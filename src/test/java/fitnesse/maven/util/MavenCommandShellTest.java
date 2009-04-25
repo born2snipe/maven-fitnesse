@@ -25,23 +25,18 @@ public class MavenCommandShellTest extends TestCase {
     private static final PomFile POM_FILE = new PomFile(new File("blah/pom.xml"));
     private CommandShell shell;
     private MavenCommandShell mvnShell;
-    private String originalOs;
+    private Sys sys;
 
     protected void setUp() throws Exception {
         super.setUp();
+        sys = mock(Sys.class);
         shell = mock(CommandShell.class);
-        mvnShell = new MavenCommandShell(shell);
-
-        originalOs = System.getProperty("os.name");
-        System.setProperty("os.name", "mac");
+        mvnShell = new MavenCommandShell(shell, sys);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        System.setProperty("os.name", originalOs);
-    }
 
     public void test_execute_WithOutputHandler() {
+        when(sys.isWindows()).thenReturn(false);
         when(shell.execute(POM_FILE.getDirectory(), "mvn", "clean", "install")).thenReturn("1,2,3");
 
         MavenCommandShell.OutputHandler handler = new MavenCommandShell.OutputHandler() {
@@ -54,14 +49,14 @@ public class MavenCommandShellTest extends TestCase {
     }
 
     public void test_execute_Unix() {
+        when(sys.isWindows()).thenReturn(false);
         when(shell.execute(POM_FILE.getDirectory(), "mvn", "clean", "install")).thenReturn("output");
 
         assertEquals("output", mvnShell.execute(POM_FILE, "clean", "install"));
     }
 
     public void test_execute_Windows() {
-        System.setProperty("os.name", "windows");
-
+        when(sys.isWindows()).thenReturn(true);
         when(shell.execute(POM_FILE.getDirectory(), "mvn.bat", "clean", "install")).thenReturn("windows output");
 
         assertEquals("windows output", mvnShell.execute(POM_FILE, "clean", "install"));

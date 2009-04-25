@@ -21,13 +21,15 @@ import java.util.List;
 
 public class MavenCommandShell {
     private CommandShell shell;
+    private Sys sys;
 
     public MavenCommandShell() {
-        this(new CommandShell());
+        this(new CommandShell(), new Sys());
     }
 
-    protected MavenCommandShell(CommandShell shell) {
+    protected MavenCommandShell(CommandShell shell, Sys sys) {
         this.shell = shell;
+        this.sys = sys;
     }
 
     public String execute(PomFile pomFile, String... args) {
@@ -38,14 +40,10 @@ public class MavenCommandShell {
     }
 
     protected String mvnCommand() {
-        if (isWindows()) {
+        if (sys.isWindows()) {
             return "mvn.bat";
         }
         return "mvn";
-    }
-
-    protected boolean isWindows() {
-        return System.getProperty("os.name").toLowerCase().contains("windows");
     }
 
     public Object execute(PomFile pomFile, OutputHandler handler, String... args) {

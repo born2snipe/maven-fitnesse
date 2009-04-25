@@ -18,10 +18,13 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 
+import fitnesse.maven.PomFile;
+
 
 public class MavenPomResolverTest extends TestCase {
     private static final File DIR = new File("dir");
     private static final File FILE = new File(DIR, "pom.xml");
+    private static final PomFile POM = new PomFile(FILE);
     private FileUtil fileUtil;
     private MavenPomResolver resolver;
 
@@ -35,7 +38,7 @@ public class MavenPomResolverTest extends TestCase {
         when(fileUtil.isDirectory(FILE)).thenReturn(false);
         when(fileUtil.exists(FILE)).thenReturn(true);
 
-        assertSame(FILE, resolver.resolve(FILE));
+        assertEquals(POM, resolver.resolve(FILE));
     }
 
     public void test_resolve_File_DoesNotExist() {
@@ -57,6 +60,6 @@ public class MavenPomResolverTest extends TestCase {
         when(fileUtil.exists(DIR)).thenReturn(true);
         when(fileUtil.exists(FILE)).thenReturn(true);
 
-        assertEquals(FILE, resolver.resolve(DIR));
+        assertEquals(POM, resolver.resolve(DIR));
     }
 }

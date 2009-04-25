@@ -12,6 +12,7 @@
  */
 package fitnesse.maven.widget;
 
+import fitnesse.maven.PomFile;
 import fitnesse.maven.util.*;
 import fitnesse.wikitext.widgets.ParentWidget;
 import junit.framework.TestCase;
@@ -29,6 +30,7 @@ public class PomWidgetTest extends TestCase {
     private MavenOutputDirectoryResolver mavenOutputDirectoryResolver;
     private IdGenerator idGenerator;
     private MavenPomResolver mavenPomResolver;
+    private static final PomFile POM_FILE = new PomFile(new File("/blah/pom.xml"));
 
 
     protected void setUp() throws Exception {
@@ -49,28 +51,24 @@ public class PomWidgetTest extends TestCase {
     }
 
     public void test_pomFileCouldNotBeResolved() throws Exception {
-        File pomFile = new File("/blah/pom.xml");
-
-        when(mavenPomResolver.resolve(pomFile)).thenReturn(null);
+        when(mavenPomResolver.resolve(POM_FILE.getFile())).thenReturn(null);
 
         PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
 
         String expectedHtml = "<div class=\"collapse_rim\">" +
-		        "<a href=\"javascript:toggleCollapsable('maven-pom-null');\">" +
-		        "<img src=\"/files/images/collapsableClosed.gif\" class=\"left\" id=\"imgmaven-pom-null\"/></a>" +
-		        "<b><span class=\"meta\">&nbsp;Maven POM could NOT be found: /blah/pom.xml</span></b>" +
-		        "<div class=\"hidden\" id=\"maven-pom-null\"></div></div>";
+                "<a href=\"javascript:toggleCollapsable('maven-pom-null');\">" +
+                "<img src=\"/files/images/collapsableClosed.gif\" class=\"left\" id=\"imgmaven-pom-null\"/></a>" +
+                "<b><span class=\"meta\">&nbsp;Maven POM could NOT be found: /blah/pom.xml</span></b>" +
+                "<div class=\"hidden\" id=\"maven-pom-null\"></div></div>";
 
         assertEquals(expectedHtml, removeEndingWhitespace(widget.render()));
-	    verifyZeroInteractions(mavenDependencyResolver);
-	    verifyZeroInteractions(mavenOutputDirectoryResolver);
+        verifyZeroInteractions(mavenDependencyResolver);
+        verifyZeroInteractions(mavenOutputDirectoryResolver);
     }
 
     public void test_dependencyResolverThrowsException() throws Exception {
-        File pomFile = new File("/blah/pom.xml");
-
-        when(mavenPomResolver.resolve(pomFile)).thenReturn(pomFile);
-        when(mavenDependencyResolver.resolve(pomFile)).thenThrow(new MavenException("error"));
+        when(mavenPomResolver.resolve(POM_FILE.getFile())).thenReturn(POM_FILE);
+        when(mavenDependencyResolver.resolve(POM_FILE)).thenThrow(new MavenException("error"));
         when(idGenerator.generate()).thenReturn("1");
 
         PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
@@ -88,12 +86,11 @@ public class PomWidgetTest extends TestCase {
 
 
     public void test_multipleDependencies() throws Exception {
-        File pomFile = new File("/blah/pom.xml");
         List<String> dependencies = Arrays.asList("junit.jar", "jmock.jar");
 
-        when(mavenPomResolver.resolve(pomFile)).thenReturn(pomFile);
-        when(mavenOutputDirectoryResolver.resolve(pomFile)).thenReturn(Arrays.asList("/target/classes"));
-        when(mavenDependencyResolver.resolve(pomFile)).thenReturn(dependencies);
+        when(mavenPomResolver.resolve(POM_FILE.getFile())).thenReturn(POM_FILE);
+        when(mavenOutputDirectoryResolver.resolve(POM_FILE)).thenReturn(Arrays.asList("/target/classes"));
+        when(mavenDependencyResolver.resolve(POM_FILE)).thenReturn(dependencies);
         when(idGenerator.generate()).thenReturn("1");
 
         PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
@@ -113,12 +110,11 @@ public class PomWidgetTest extends TestCase {
 
 
     public void test_singleDependency() throws Exception {
-        File pomFile = new File("/blah/pom.xml");
         List<String> dependencies = Arrays.asList("junit.jar");
 
-        when(mavenPomResolver.resolve(pomFile)).thenReturn(pomFile);
-        when(mavenDependencyResolver.resolve(pomFile)).thenReturn(dependencies);
-        when(mavenOutputDirectoryResolver.resolve(pomFile)).thenReturn(Arrays.asList("/target/classes"));
+        when(mavenPomResolver.resolve(POM_FILE.getFile())).thenReturn(POM_FILE);
+        when(mavenDependencyResolver.resolve(POM_FILE)).thenReturn(dependencies);
+        when(mavenOutputDirectoryResolver.resolve(POM_FILE)).thenReturn(Arrays.asList("/target/classes"));
 
         PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
 

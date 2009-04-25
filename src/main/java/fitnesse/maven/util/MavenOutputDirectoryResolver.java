@@ -18,15 +18,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class MavenOutputDirectoryResolver extends AbstractMavenResolver {
-    private static Pattern TEST_OUTPUT = Pattern.compile("<testOutputDirectory>(.+)</testOutputDirectory>");
-    private static Pattern OUTPUT = Pattern.compile("<outputDirectory>(.+)</outputDirectory>");
+public class MavenOutputDirectoryResolver extends AbstractMavenDependencyResolver {
+    private static final Pattern TEST_OUTPUT = Pattern.compile("<testOutputDirectory>(.+)</testOutputDirectory>");
+    private static final Pattern OUTPUT = Pattern.compile("<outputDirectory>(.+)</outputDirectory>");
 
     public MavenOutputDirectoryResolver() {
-        this(new DependencyCache(), new CommandShell());
+        this(new DependencyCache(), new MavenCommandShell());
     }
 
-    protected MavenOutputDirectoryResolver(DependencyCache cache, CommandShell shell) {
+    protected MavenOutputDirectoryResolver(DependencyCache cache, MavenCommandShell shell) {
         super(cache, shell);
     }
 

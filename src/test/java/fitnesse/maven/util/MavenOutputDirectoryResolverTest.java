@@ -12,6 +12,7 @@
  */
 package fitnesse.maven.util;
 
+import fitnesse.maven.PomFile;
 import junit.framework.TestCase;
 import static org.mockito.Mockito.*;
 
@@ -22,25 +23,17 @@ import java.util.List;
 
 
 public class MavenOutputDirectoryResolverTest extends TestCase {
-    private static final File POM_FILE = new File("pom.xml");
-    private CommandShell shell;
+    private static final PomFile POM_FILE = new PomFile(new File("pom.xml"));
+    private MavenCommandShell shell;
     private DependencyCache cache;
     private MavenOutputDirectoryResolver resolver;
-    private String originalOs;
 
 
     protected void setUp() throws Exception {
         super.setUp();
-        originalOs = System.getProperty("os.name");
-        shell = mock(CommandShell.class);
+        shell = mock(MavenCommandShell.class);
         cache = mock(DependencyCache.class);
         resolver = new MavenOutputDirectoryResolver(cache, shell);
-    }
-
-
-    @Override
-    protected void tearDown() throws Exception {
-        System.setProperty("os.name", originalOs);
     }
 
 
@@ -112,10 +105,8 @@ public class MavenOutputDirectoryResolverTest extends TestCase {
                 "[INFO] Final Memory: 1M/508M\n" +
                 "[INFO] ------------------------------------------------------------------------\n";
 
-        System.setProperty("os.name", "windows");
-
-        when(cache.hasChanged(POM_FILE)).thenReturn(true);
-        when(shell.execute(POM_FILE.getParentFile(), "mvn.bat", "help:effective-pom")).thenReturn(consoleOutput);
+        when(cache.hasChanged(POM_FILE.getFile())).thenReturn(true);
+        when(shell.execute(POM_FILE, "help:effective-pom")).thenReturn(consoleOutput);
 
         try {
             resolver.resolve(POM_FILE);
@@ -128,42 +119,38 @@ public class MavenOutputDirectoryResolverTest extends TestCase {
 
 
     public void test_resolve_NotCached_Windows() {
-        System.setProperty("os.name", "windows");
-
         String consoleOutput = consoleOutput("C:\\target\\classes", "C:\\target\\test-classes");
 
-        when(cache.hasChanged(POM_FILE)).thenReturn(true);
-        when(shell.execute(POM_FILE.getParentFile(), "mvn.bat", "help:effective-pom")).thenReturn(consoleOutput);
+        when(cache.hasChanged(POM_FILE.getFile())).thenReturn(true);
+        when(shell.execute(POM_FILE, "help:effective-pom")).thenReturn(consoleOutput);
 
         List<String> outputDirs = Arrays.asList("C:\\target\\classes", "C:\\target\\test-classes");
         assertEquals(outputDirs, resolver.resolve(POM_FILE));
 
-        verify(shell).execute(POM_FILE.getParentFile(), "mvn.bat", "help:effective-pom");
-        verify(cache).cache(POM_FILE, outputDirs);
+        verify(shell).execute(POM_FILE, "help:effective-pom");
+        verify(cache).cache(POM_FILE.getFile(), outputDirs);
     }
 
 
     public void test_resolve_NotCached_Unix() {
-        System.setProperty("os.name", "mac");
-
         String consoleOutput = consoleOutput("/target/classes", "/target/test-classes");
 
-        when(cache.hasChanged(POM_FILE)).thenReturn(true);
-        when(shell.execute(POM_FILE.getParentFile(), "mvn", "help:effective-pom")).thenReturn(consoleOutput);
+        when(cache.hasChanged(POM_FILE.getFile())).thenReturn(true);
+        when(shell.execute(POM_FILE, "help:effective-pom")).thenReturn(consoleOutput);
 
         List<String> outputDirs = Arrays.asList("/target/classes", "/target/test-classes");
         assertEquals(outputDirs, resolver.resolve(POM_FILE));
 
-        verify(shell).execute(POM_FILE.getParentFile(), "mvn", "help:effective-pom");
-        verify(cache).cache(POM_FILE, outputDirs);
+        verify(shell).execute(POM_FILE, "help:effective-pom");
+        verify(cache).cache(POM_FILE.getFile(), outputDirs);
     }
 
 
     public void test_execute_Cached() {
         List<String> directories = Arrays.asList("/target/classes");
 
-        when(cache.hasChanged(POM_FILE)).thenReturn(false);
-        when(cache.getDependencies(POM_FILE)).thenReturn(directories);
+        when(cache.hasChanged(POM_FILE.getFile())).thenReturn(false);
+        when(cache.getDependencies(POM_FILE.getFile())).thenReturn(directories);
 
         assertEquals(directories, resolver.resolve(POM_FILE));
     }

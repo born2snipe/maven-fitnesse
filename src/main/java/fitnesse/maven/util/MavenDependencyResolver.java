@@ -16,44 +16,46 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class MavenDependencyResolver extends AbstractMavenResolver {
+public class MavenDependencyResolver extends AbstractMavenDependencyResolver {
+    private Sys sys;
 
-	public MavenDependencyResolver() {
-		this(new CommandShell(), new DependencyCache());
-	}
-
-
-	protected MavenDependencyResolver(CommandShell commandShell, DependencyCache dependencyCache) {
-		super(dependencyCache, commandShell);
-	}
+    public MavenDependencyResolver() {
+        this(new MavenCommandShell(), new DependencyCache(), new Sys());
+    }
 
 
-	protected List<String> handleConsoleOutput(String consoleOutput) {
-		return Arrays.asList(grabClassPathFromConsoleOutput(consoleOutput).split(getPathSeperator()));
-	}
+    protected MavenDependencyResolver(MavenCommandShell commandShell, DependencyCache dependencyCache, Sys sys) {
+        super(dependencyCache, commandShell);
+        this.sys = sys;
+    }
 
 
-	protected List<String> mvnArgs() {
-		return Arrays.asList("dependency:build-classpath", "-DincludeScope=test");
-	}
+    protected List<String> handleConsoleOutput(String consoleOutput) {
+        return Arrays.asList(grabClassPathFromConsoleOutput(consoleOutput).split(getPathSeperator()));
+    }
 
 
-	private String getPathSeperator() {
-		if (isWindows()) {
-			return ";";
-		}
-		return ":";
-	}
+    protected List<String> mvnArgs() {
+        return Arrays.asList("dependency:build-classpath", "-DincludeScope=test");
+    }
 
 
-	private String grabClassPathFromConsoleOutput(String output) {
-		List<String> lines = Arrays.asList(output.split("\n"));
-		for (int i = 0; i < lines.size(); i++) {
-			if (lines.get(i).contains("Dependencies classpath")) {
-				return lines.get(i + 1).trim();
-			}
-		}
-		return "";
-	}
+    private String getPathSeperator() {
+        if (sys.isWindows()) {
+            return ";";
+        }
+        return ":";
+    }
+
+
+    private String grabClassPathFromConsoleOutput(String output) {
+        List<String> lines = Arrays.asList(output.split("\n"));
+        for (int i = 0; i < lines.size(); i++) {
+            if (lines.get(i).contains("Dependencies classpath")) {
+                return lines.get(i + 1).trim();
+            }
+        }
+        return "";
+    }
 
 }
