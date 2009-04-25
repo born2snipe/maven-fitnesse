@@ -43,13 +43,6 @@ public abstract class AbstractMavenDependencyResolver {
 
     protected abstract List<String> handleConsoleOutput(String consoleOutput);
 
-    protected String mvnCommand() {
-        if (isWindows()) {
-            return "mvn.bat";
-        }
-        return "mvn";
-    }
-
     protected boolean isWindows() {
         return System.getProperty("os.name").toLowerCase().contains("windows");
     }
