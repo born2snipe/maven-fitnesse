@@ -21,27 +21,21 @@ import java.util.regex.Pattern;
 
 public class LocalRepoResolver {
     private static final Pattern LOCAL_REPO_PATTERN = Pattern.compile("<localRepository>(.+)</localRepository>");
-    private CommandShell shell;
+    private MavenCommandShell shell;
 
-    public LocalRepoResolver(CommandShell shell) {
+    public LocalRepoResolver() {
+        this(new MavenCommandShell());
+    }
+
+    protected LocalRepoResolver(MavenCommandShell shell) {
         this.shell = shell;
     }
 
     public File resolve(PomFile pomFile) {
-        String consoleOutput = shell.execute(pomFile.getDirectory(), mvnCommand(), "help:effective-settings");
+        String consoleOutput = shell.execute(pomFile, "help:effective-settings");
         Matcher matcher = LOCAL_REPO_PATTERN.matcher(consoleOutput);
         matcher.find();
         return new File(matcher.group(1));
     }
 
-    protected String mvnCommand() {
-        if (isWindows()) {
-            return "mvn.bat";
-        }
-        return "mvn";
-    }
-
-    protected boolean isWindows() {
-        return System.getProperty("os.name").toLowerCase().contains("windows");
-    }
 }

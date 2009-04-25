@@ -22,42 +22,30 @@ import java.text.MessageFormat;
 
 
 public class LocalRepoResolverTest extends TestCase {
-    private static final File POM = new File("blah/pom.xml");
-    private CommandShell shell;
+    private static final PomFile POM = new PomFile(new File("blah/pom.xml"));
+    private MavenCommandShell shell;
     private LocalRepoResolver resolver;
-    private String originalOs;
 
     protected void setUp() throws Exception {
         super.setUp();
-        shell = mock(CommandShell.class);
+        shell = mock(MavenCommandShell.class);
         resolver = new LocalRepoResolver(shell);
-
-        originalOs = System.getProperty("os.name");
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        System.setProperty("os.name", originalOs);
     }
 
     public void test_resolve_Unix() {
-        System.setProperty("os.name", "mac");
-
         String consoleOutput = goodResponse("/Users/dan/.m2/repository");
 
-        when(shell.execute(POM.getParentFile(), "mvn", "help:effective-settings")).thenReturn(consoleOutput);
+        when(shell.execute(POM, "help:effective-settings")).thenReturn(consoleOutput);
 
-        assertEquals(new File("/Users/dan/.m2/repository"), resolver.resolve(new PomFile(POM)));
+        assertEquals(new File("/Users/dan/.m2/repository"), resolver.resolve(POM));
     }
 
     public void test_resolve_Windows() {
-        System.setProperty("os.name", "windows");
-
         String consoleOutput = goodResponse("c:\\Users\\dan\\.m2\\repository");
 
-        when(shell.execute(POM.getParentFile(), "mvn.bat", "help:effective-settings")).thenReturn(consoleOutput);
+        when(shell.execute(POM, "help:effective-settings")).thenReturn(consoleOutput);
 
-        assertEquals(new File("c:\\Users\\dan\\.m2\\repository"), resolver.resolve(new PomFile(POM)));
+        assertEquals(new File("c:\\Users\\dan\\.m2\\repository"), resolver.resolve(POM));
     }
 
     private String goodResponse(String filePath) {

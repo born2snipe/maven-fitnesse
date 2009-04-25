@@ -18,42 +18,42 @@ import java.util.List;
 
 public class MavenDependencyResolver extends AbstractMavenDependencyResolver {
 
-	public MavenDependencyResolver() {
-		this(new CommandShell(), new DependencyCache());
-	}
+    public MavenDependencyResolver() {
+        this(new MavenCommandShell(), new DependencyCache());
+    }
 
 
-	protected MavenDependencyResolver(CommandShell commandShell, DependencyCache dependencyCache) {
-		super(dependencyCache, commandShell);
-	}
+    protected MavenDependencyResolver(MavenCommandShell commandShell, DependencyCache dependencyCache) {
+        super(dependencyCache, commandShell);
+    }
 
 
-	protected List<String> handleConsoleOutput(String consoleOutput) {
-		return Arrays.asList(grabClassPathFromConsoleOutput(consoleOutput).split(getPathSeperator()));
-	}
+    protected List<String> handleConsoleOutput(String consoleOutput) {
+        return Arrays.asList(grabClassPathFromConsoleOutput(consoleOutput).split(getPathSeperator()));
+    }
 
 
-	protected List<String> mvnArgs() {
-		return Arrays.asList("dependency:build-classpath", "-DincludeScope=test");
-	}
+    protected List<String> mvnArgs() {
+        return Arrays.asList("dependency:build-classpath", "-DincludeScope=test");
+    }
 
 
-	private String getPathSeperator() {
-		if (isWindows()) {
-			return ";";
-		}
-		return ":";
-	}
+    private String getPathSeperator() {
+        if (isWindows()) {
+            return ";";
+        }
+        return ":";
+    }
 
 
-	private String grabClassPathFromConsoleOutput(String output) {
-		List<String> lines = Arrays.asList(output.split("\n"));
-		for (int i = 0; i < lines.size(); i++) {
-			if (lines.get(i).contains("Dependencies classpath")) {
-				return lines.get(i + 1).trim();
-			}
-		}
-		return "";
-	}
+    private String grabClassPathFromConsoleOutput(String output) {
+        List<String> lines = Arrays.asList(output.split("\n"));
+        for (int i = 0; i < lines.size(); i++) {
+            if (lines.get(i).contains("Dependencies classpath")) {
+                return lines.get(i + 1).trim();
+            }
+        }
+        return "";
+    }
 
 }

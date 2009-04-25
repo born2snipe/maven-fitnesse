@@ -12,6 +12,7 @@
  */
 package fitnesse.maven.util;
 
+import fitnesse.maven.PomFile;
 import junit.framework.TestCase;
 import static org.mockito.Mockito.*;
 
@@ -20,12 +21,10 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
 
-import fitnesse.maven.PomFile;
-
 
 public class MavenOutputDirectoryResolverTest extends TestCase {
     private static final PomFile POM_FILE = new PomFile(new File("pom.xml"));
-    private CommandShell shell;
+    private MavenCommandShell shell;
     private DependencyCache cache;
     private MavenOutputDirectoryResolver resolver;
     private String originalOs;
@@ -34,7 +33,7 @@ public class MavenOutputDirectoryResolverTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         originalOs = System.getProperty("os.name");
-        shell = mock(CommandShell.class);
+        shell = mock(MavenCommandShell.class);
         cache = mock(DependencyCache.class);
         resolver = new MavenOutputDirectoryResolver(cache, shell);
     }
@@ -117,7 +116,7 @@ public class MavenOutputDirectoryResolverTest extends TestCase {
         System.setProperty("os.name", "windows");
 
         when(cache.hasChanged(POM_FILE.getFile())).thenReturn(true);
-        when(shell.execute(POM_FILE.getFile().getParentFile(), "mvn.bat", "help:effective-pom")).thenReturn(consoleOutput);
+        when(shell.execute(POM_FILE, "help:effective-pom")).thenReturn(consoleOutput);
 
         try {
             resolver.resolve(POM_FILE);
@@ -135,12 +134,12 @@ public class MavenOutputDirectoryResolverTest extends TestCase {
         String consoleOutput = consoleOutput("C:\\target\\classes", "C:\\target\\test-classes");
 
         when(cache.hasChanged(POM_FILE.getFile())).thenReturn(true);
-        when(shell.execute(POM_FILE.getFile().getParentFile(), "mvn.bat", "help:effective-pom")).thenReturn(consoleOutput);
+        when(shell.execute(POM_FILE, "help:effective-pom")).thenReturn(consoleOutput);
 
         List<String> outputDirs = Arrays.asList("C:\\target\\classes", "C:\\target\\test-classes");
         assertEquals(outputDirs, resolver.resolve(POM_FILE));
 
-        verify(shell).execute(POM_FILE.getFile().getParentFile(), "mvn.bat", "help:effective-pom");
+        verify(shell).execute(POM_FILE, "help:effective-pom");
         verify(cache).cache(POM_FILE.getFile(), outputDirs);
     }
 
@@ -151,12 +150,12 @@ public class MavenOutputDirectoryResolverTest extends TestCase {
         String consoleOutput = consoleOutput("/target/classes", "/target/test-classes");
 
         when(cache.hasChanged(POM_FILE.getFile())).thenReturn(true);
-        when(shell.execute(POM_FILE.getFile().getParentFile(), "mvn", "help:effective-pom")).thenReturn(consoleOutput);
+        when(shell.execute(POM_FILE, "help:effective-pom")).thenReturn(consoleOutput);
 
         List<String> outputDirs = Arrays.asList("/target/classes", "/target/test-classes");
         assertEquals(outputDirs, resolver.resolve(POM_FILE));
 
-        verify(shell).execute(POM_FILE.getFile().getParentFile(), "mvn", "help:effective-pom");
+        verify(shell).execute(POM_FILE, "help:effective-pom");
         verify(cache).cache(POM_FILE.getFile(), outputDirs);
     }
 

@@ -12,8 +12,8 @@
  */
 package fitnesse.maven.util;
 
-import fitnesse.util.StringUtil;
 import fitnesse.maven.PomFile;
+import fitnesse.util.StringUtil;
 import junit.framework.TestCase;
 import static org.mockito.Mockito.*;
 
@@ -41,7 +41,7 @@ public class MavenDependencyResolverTest extends TestCase {
             "[INFO] Finished at: Mon Apr 20 17:54:34 CDT 2009\n" +
             "[INFO] Final Memory: 20M/52M\n" +
             "[INFO] ------------------------------------------------------------------------\n";
-    private CommandShell commandShell;
+    private MavenCommandShell commandShell;
     private DependencyCache dependencyCache;
 
     private MavenDependencyResolver resolver;
@@ -51,7 +51,7 @@ public class MavenDependencyResolverTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         originalOs = System.getProperty("os.name");
-        commandShell = mock(CommandShell.class);
+        commandShell = mock(MavenCommandShell.class);
         dependencyCache = mock(DependencyCache.class);
         resolver = new MavenDependencyResolver(commandShell, dependencyCache);
     }
@@ -115,7 +115,7 @@ public class MavenDependencyResolverTest extends TestCase {
         System.setProperty("os.name", "windows");
 
         when(dependencyCache.hasChanged(POM_FILE.getFile())).thenReturn(true);
-        when(commandShell.execute(POM_FILE.getFile().getParentFile(), "mvn.bat", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
+        when(commandShell.execute(POM_FILE, "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
 
         try {
             resolver.resolve(POM_FILE);
@@ -222,7 +222,7 @@ public class MavenDependencyResolverTest extends TestCase {
         System.setProperty("os.name", "windows");
 
         when(dependencyCache.hasChanged(POM_FILE.getFile())).thenReturn(true);
-        when(commandShell.execute(POM_FILE.getFile().getParentFile(), "mvn.bat", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
+        when(commandShell.execute(POM_FILE, "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
 
         try {
             resolver.resolve(POM_FILE);
@@ -248,7 +248,7 @@ public class MavenDependencyResolverTest extends TestCase {
         String consoleOutput = createMavenOutput(";", "c:/users/common/classworlds-1.1.jar", "/junit.jar");
 
         when(dependencyCache.hasChanged(POM_FILE.getFile())).thenReturn(true);
-        when(commandShell.execute(POM_FILE.getFile().getParentFile(), "mvn.bat", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
+        when(commandShell.execute(POM_FILE, "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
 
         List<String> expectedDependencies = Arrays.asList("c:/users/common/classworlds-1.1.jar", "/junit.jar");
         assertEquals(expectedDependencies, resolver.resolve(POM_FILE));
@@ -263,7 +263,7 @@ public class MavenDependencyResolverTest extends TestCase {
         String consoleOutput = createMavenOutput(":", "/classworlds-1.1.jar", "/junit.jar");
 
         when(dependencyCache.hasChanged(POM_FILE.getFile())).thenReturn(true);
-        when(commandShell.execute(POM_FILE.getFile().getParentFile(), "mvn", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
+        when(commandShell.execute(POM_FILE, "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
 
         List<String> expectedDependencies = Arrays.asList("/classworlds-1.1.jar", "/junit.jar");
         assertEquals(expectedDependencies, resolver.resolve(POM_FILE));
@@ -278,7 +278,7 @@ public class MavenDependencyResolverTest extends TestCase {
         String consoleOutput = createMavenOutput(";", "/classworlds-1.1.jar");
 
         when(dependencyCache.hasChanged(POM_FILE.getFile())).thenReturn(true);
-        when(commandShell.execute(POM_FILE.getFile().getParentFile(), "mvn", "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
+        when(commandShell.execute(POM_FILE, "dependency:build-classpath", "-DincludeScope=test")).thenReturn(consoleOutput);
 
         List<String> expectedDependencies = Arrays.asList("/classworlds-1.1.jar");
         assertEquals(expectedDependencies, resolver.resolve(POM_FILE));
