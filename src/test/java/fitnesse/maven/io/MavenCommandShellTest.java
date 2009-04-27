@@ -55,11 +55,18 @@ public class MavenCommandShellTest extends TestCase {
         assertEquals("output", mvnShell.execute(POM_FILE, "clean", "install"));
     }
 
-    public void test_execute_Windows() {
+    public void test_execute_Windows_PomFile() {
         when(sys.isWindows()).thenReturn(true);
         when(shell.execute(POM_FILE.getDirectory(), "mvn.bat", "clean", "install")).thenReturn("windows output");
 
         assertEquals("windows output", mvnShell.execute(POM_FILE, "clean", "install"));
+    }
+
+    public void test_execute_Windows_File() {
+        when(sys.isWindows()).thenReturn(true);
+        when(shell.execute(POM_FILE.getDirectory(), "mvn.bat", "clean", "install")).thenReturn("windows output");
+
+        assertEquals("windows output", mvnShell.execute(POM_FILE.getFile(), "clean", "install"));
     }
 
 

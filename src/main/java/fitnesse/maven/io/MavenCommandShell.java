@@ -14,6 +14,7 @@ package fitnesse.maven.io;
 
 import fitnesse.maven.util.Sys;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,10 +34,14 @@ public class MavenCommandShell {
     }
 
     public String execute(PomFile pomFile, String... args) {
+        return execute(pomFile.getFile(), args);
+    }
+
+    public String execute(File file, String... args) {
         List<String> params = new ArrayList<String>();
         params.add(mvnCommand());
         params.addAll(Arrays.asList(args));
-        return shell.execute(pomFile.getDirectory(), params.toArray(new String[0]));
+        return shell.execute(file.getParentFile(), params.toArray(new String[0]));
     }
 
     protected String mvnCommand() {
@@ -49,6 +54,7 @@ public class MavenCommandShell {
     public Object execute(PomFile pomFile, OutputHandler handler, String... args) {
         return handler.handle(execute(pomFile, args));
     }
+
 
     public interface OutputHandler {
         public Object handle(String consoleOutput);
