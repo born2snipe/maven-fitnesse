@@ -12,10 +12,7 @@
  */
 package fitnesse.maven.io;
 
-import fitnesse.maven.PomFile;
 import fitnesse.maven.util.Sys;
-import fitnesse.maven.io.CommandShell;
-import fitnesse.maven.io.MavenCommandShell;
 import junit.framework.TestCase;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

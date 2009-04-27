@@ -12,9 +12,12 @@
  */
 package fitnesse.maven.widget;
 
-import fitnesse.maven.PomFile;
 import fitnesse.maven.io.MavenException;
-import fitnesse.maven.util.*;
+import fitnesse.maven.io.PomFile;
+import fitnesse.maven.util.IdGenerator;
+import fitnesse.maven.util.MavenDependencyResolver;
+import fitnesse.maven.util.MavenOutputDirectoryResolver;
+import fitnesse.maven.util.MavenPomResolver;
 import fitnesse.wikitext.widgets.ParentWidget;
 import junit.framework.TestCase;
 import static org.mockito.Mockito.*;

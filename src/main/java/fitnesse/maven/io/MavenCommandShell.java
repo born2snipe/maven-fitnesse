@@ -12,9 +12,7 @@
  */
 package fitnesse.maven.io;
 
-import fitnesse.maven.PomFile;
 import fitnesse.maven.util.Sys;
-import fitnesse.maven.io.CommandShell;
 
 import java.util.ArrayList;
 import java.util.Arrays;

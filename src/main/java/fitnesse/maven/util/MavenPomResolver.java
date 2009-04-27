@@ -12,8 +12,8 @@
  */
 package fitnesse.maven.util;
 
-import fitnesse.maven.PomFile;
 import fitnesse.maven.io.FileUtil;
+import fitnesse.maven.io.PomFile;
 
 import java.io.File;
 
