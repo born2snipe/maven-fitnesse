@@ -13,6 +13,7 @@
 package fitnesse.maven.util;
 
 import fitnesse.maven.PomFile;
+import fitnesse.maven.io.MavenCommandShell;
 
 import java.io.File;
 import java.util.regex.Matcher;

@@ -12,6 +12,8 @@
  */
 package fitnesse.maven.util;
 
+import fitnesse.maven.io.MavenCommandShell;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;

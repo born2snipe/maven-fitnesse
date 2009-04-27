@@ -13,6 +13,7 @@
 package fitnesse.maven.widget;
 
 import fitnesse.maven.PomFile;
+import fitnesse.maven.io.MavenException;
 import fitnesse.maven.util.*;
 import fitnesse.wikitext.widgets.ParentWidget;
 import junit.framework.TestCase;

@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 
 import fitnesse.maven.PomFile;
+import fitnesse.maven.io.FileUtil;
 
 
 public class MavenPomResolverTest extends TestCase {

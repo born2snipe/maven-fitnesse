@@ -20,6 +20,8 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.ArrayList;
 
+import fitnesse.maven.io.FileUtil;
+
 
 public class DependencyCacheTest extends TestCase {
     private static final File POM_FILE = new File("pom.xml");

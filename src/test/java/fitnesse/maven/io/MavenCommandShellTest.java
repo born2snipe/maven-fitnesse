@@ -10,9 +10,12 @@
  * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and limitations under the License.
  */
-package fitnesse.maven.util;
+package fitnesse.maven.io;
 
 import fitnesse.maven.PomFile;
+import fitnesse.maven.util.Sys;
+import fitnesse.maven.io.CommandShell;
+import fitnesse.maven.io.MavenCommandShell;
 import junit.framework.TestCase;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

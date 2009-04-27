@@ -13,6 +13,7 @@
 package fitnesse.maven.util;
 
 import fitnesse.maven.PomFile;
+import fitnesse.maven.io.FileUtil;
 
 import java.io.File;
 

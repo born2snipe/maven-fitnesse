@@ -12,6 +12,8 @@
  */
 package fitnesse.maven.util;
 
+import fitnesse.maven.io.FileUtil;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;

@@ -13,6 +13,8 @@
 package fitnesse.maven.util;
 
 import fitnesse.maven.PomFile;
+import fitnesse.maven.io.MavenCommandShell;
+import fitnesse.maven.io.MavenException;
 import fitnesse.util.StringUtil;
 import junit.framework.TestCase;
 import static org.mockito.Mockito.*;

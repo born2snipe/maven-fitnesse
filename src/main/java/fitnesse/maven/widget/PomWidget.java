@@ -17,6 +17,7 @@ import fitnesse.html.HtmlTag;
 import fitnesse.html.HtmlUtil;
 import fitnesse.html.RawHtml;
 import fitnesse.maven.PomFile;
+import fitnesse.maven.io.MavenException;
 import fitnesse.maven.util.*;
 import fitnesse.wiki.PageData;
 import fitnesse.wikitext.WidgetBuilder;
