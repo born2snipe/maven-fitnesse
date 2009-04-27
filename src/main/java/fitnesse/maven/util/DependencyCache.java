@@ -13,12 +13,14 @@
 package fitnesse.maven.util;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 public class DependencyCache {
+    private Cache<File, CachedPom> cache;
     private FileUtil fileUtil;
-    private Map<File, CachedPom> cache = new HashMap<File, CachedPom>();
 
     public DependencyCache() {
         this(new FileUtil());
@@ -26,17 +28,15 @@ public class DependencyCache {
 
     protected DependencyCache(FileUtil fileUtil) {
         this.fileUtil = fileUtil;
+        cache = new Cache<File, CachedPom>(new PomHandler(fileUtil));
     }
 
     public void cache(File pomFile, List<String> dependencies) {
-        cache.put(pomFile, new CachedPom(dependencies, fileUtil.lastModified(pomFile)));
+        cache.cache(pomFile, new CachedPom(dependencies, fileUtil.lastModified(pomFile), pomFile));
     }
 
     public boolean hasChanged(File pomFile) {
-        CachedPom cachedPom = cache.get(pomFile);
-        if (cachedPom == null)
-            return true;
-        return fileUtil.lastModified(pomFile) != cachedPom.lastModified;
+        return cache.hasChanged(pomFile);
     }
 
     public List<String> getDependencies(File pomFile) {
@@ -49,11 +49,24 @@ public class DependencyCache {
     private static class CachedPom {
         public final List<String> dependencies;
         public final long lastModified;
+        public final File file;
 
-        private CachedPom(List<String> dependencies, long lastModified) {
+        private CachedPom(List<String> dependencies, long lastModified, File file) {
+            this.file = file;
             this.dependencies = Collections.unmodifiableList(dependencies);
             this.lastModified = lastModified;
         }
     }
 
+    private static class PomHandler implements Cache.IsOutOfDateHandler<CachedPom> {
+        private FileUtil fileUtil;
+
+        private PomHandler(FileUtil fileUtil) {
+            this.fileUtil = fileUtil;
+        }
+
+        public boolean hasChanged(CachedPom value) {
+            return fileUtil.lastModified(value.file) != value.lastModified;
+        }
+    }
 }
