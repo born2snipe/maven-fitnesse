@@ -44,8 +44,12 @@ public class PomFile {
         return parent != null;
     }
 
+    public void setParent(PomFile parent) {
+        this.parent = parent;
+    }
+
     public String toString() {
-        return file.toString();
+        return "file=" + file.toString() + ", parent=" + parent;
     }
 
     @Override

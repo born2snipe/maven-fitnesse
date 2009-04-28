@@ -50,7 +50,7 @@ public class ParentPomParserTest extends TestCase {
 
         when(localRepoResolver.resolve(POM_FILE)).thenReturn(PARENT_POM_FILE);
 
-        File file = parser.parse(POM_FILE, new ByteArrayInputStream(pomFile.getBytes()));
+        File file = parser.parse(POM_FILE.getFile(), new ByteArrayInputStream(pomFile.getBytes()));
 
         assertNotNull(file);
         assertTrue(file.getPath().contains("groupId/artifactId/version/pom.xml"));
@@ -67,7 +67,7 @@ public class ParentPomParserTest extends TestCase {
 
         when(localRepoResolver.resolve(POM_FILE)).thenReturn(PARENT_POM_FILE);
 
-        assertNull(parser.parse(POM_FILE, new ByteArrayInputStream(pomFile.getBytes())));
+        assertNull(parser.parse(POM_FILE.getFile(), new ByteArrayInputStream(pomFile.getBytes())));
     }
 
 

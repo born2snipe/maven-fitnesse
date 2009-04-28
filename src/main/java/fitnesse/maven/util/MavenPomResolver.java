@@ -13,6 +13,7 @@
 package fitnesse.maven.util;
 
 import fitnesse.maven.io.FileUtil;
+import fitnesse.maven.io.ParentPomParser;
 import fitnesse.maven.io.PomFile;
 
 import java.io.File;
@@ -20,18 +21,36 @@ import java.io.File;
 
 public class MavenPomResolver {
     private FileUtil fileUtil;
+    private ParentPomParser parentPomParser;
 
     public MavenPomResolver() {
-        this(new FileUtil());
+        this(new FileUtil(), new ParentPomParser());
     }
 
-    protected MavenPomResolver(FileUtil fileUtil) {
+    protected MavenPomResolver(FileUtil fileUtil, ParentPomParser parentPomParser) {
         this.fileUtil = fileUtil;
+        this.parentPomParser = parentPomParser;
     }
 
     public PomFile resolve(File pomFile) {
         File file = getPomFile(pomFile);
-        return file == null ? null : new PomFile(file);
+        if (file == null) {
+            return null;
+        }
+        PomFile pom = new PomFile(file);
+        File parentFile = file;
+        PomFile current = null;
+        while ((parentFile = parentPomParser.parse(parentFile)) != null) {
+            if (current == null) {
+                current = new PomFile(parentFile);
+                pom.setParent(current);
+            } else {
+                PomFile temp = new PomFile(parentFile);
+                current.setParent(temp);
+                current = temp;
+            }
+        }
+        return pom;
     }
 
     private File getPomFile(File pomFile) {

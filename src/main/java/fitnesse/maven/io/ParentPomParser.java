@@ -23,7 +23,11 @@ public class ParentPomParser {
     private LocalRepoResolver localRepoResolver;
     private Digester digester;
 
-    public ParentPomParser(LocalRepoResolver localRepoResolver) {
+    public ParentPomParser() {
+        this(new LocalRepoResolver());
+    }
+
+    protected ParentPomParser(LocalRepoResolver localRepoResolver) {
         this.localRepoResolver = localRepoResolver;
         this.digester = new Digester();
 
@@ -33,21 +37,21 @@ public class ParentPomParser {
         digester.addBeanPropertySetter("project/parent/version", "version");
     }
 
-    public File parse(PomFile pomFile) {
+    public File parse(File pomFile) {
         try {
-            return parse(pomFile, new FileInputStream(pomFile.getFile()));
+            return parse(pomFile, new FileInputStream(pomFile));
         } catch (FileNotFoundException e) {
             throw new MavenException(e);
         }
     }
 
-    protected File parse(PomFile pomFile, InputStream inputStream) {
+    protected File parse(File pomFile, InputStream inputStream) {
         try {
             ParentPomBean parentBean = (ParentPomBean) digester.parse(inputStream);
             if (parentBean == null) {
                 return null;
             }
-            File localRepoDirectory = localRepoResolver.resolve(pomFile);
+            File localRepoDirectory = localRepoResolver.resolve(new PomFile(pomFile));
             return new File(localRepoDirectory, parentBean.getFilePath());
         } catch (IOException e) {
             e.printStackTrace();

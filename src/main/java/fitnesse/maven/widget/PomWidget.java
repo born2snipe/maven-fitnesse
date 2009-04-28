@@ -90,14 +90,17 @@ public class PomWidget extends ClasspathWidget {
 
     @Override
     public String render() throws Exception {
-        RawHtml titleElement = createTitleElement("Maven POM: " + pomFile);
+        RawHtml titleElement = createTitleElement("Maven POM could NOT be found: " + pomFileInput);
         RawHtml bodyElement = new RawHtml(childHtml());
         boolean expanded = false;
+
+        if (pomFile != null) {
+            titleElement = createTitleElement("Maven POM: " + pomFile.getFile());
+        }
+
         if (errorMessage != null) {
             bodyElement = new RawHtml("<pre>" + errorMessage + "</pre>");
             expanded = true;
-        } else if (pomFile == null) {
-            titleElement = createTitleElement("Maven POM could NOT be found: " + pomFileInput);
         }
         HtmlElement html = makeCollapsableSection(titleElement, bodyElement, expanded);
         return html.html();
