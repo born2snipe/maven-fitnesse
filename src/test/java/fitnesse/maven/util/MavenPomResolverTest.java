@@ -53,6 +53,7 @@ public class MavenPomResolverTest extends TestCase {
         assertEquals(FILE, pomFile.getFile());
         assertEquals(parentPom, pomFile.getParent());
         assertEquals(parentOfParentPom, pomFile.getParent().getParent());
+        assertNull(pomFile.getParent().getParent().getParent());
     }
 
     public void test_resolve_File_HasParent() {

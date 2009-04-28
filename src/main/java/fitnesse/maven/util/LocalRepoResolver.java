@@ -13,6 +13,7 @@
 package fitnesse.maven.util;
 
 import fitnesse.maven.io.MavenCommandShell;
+import fitnesse.maven.io.MavenException;
 import fitnesse.maven.io.PomFile;
 
 import java.io.File;
@@ -23,6 +24,7 @@ import java.util.regex.Pattern;
 public class LocalRepoResolver {
     private static final Pattern LOCAL_REPO_PATTERN = Pattern.compile("<localRepository>(.+)</localRepository>");
     private MavenCommandShell shell;
+    private File localRepoDir;
 
     public LocalRepoResolver() {
         this(new MavenCommandShell());
@@ -33,10 +35,16 @@ public class LocalRepoResolver {
     }
 
     public File resolve(PomFile pomFile) {
-        String consoleOutput = shell.execute(pomFile, "help:effective-settings");
-        Matcher matcher = LOCAL_REPO_PATTERN.matcher(consoleOutput);
-        matcher.find();
-        return new File(matcher.group(1));
+        if (localRepoDir == null) {
+            String consoleOutput = shell.execute(pomFile, "help:effective-settings");
+            Matcher matcher = LOCAL_REPO_PATTERN.matcher(consoleOutput);
+            if (matcher.find()) {
+                localRepoDir = new File(matcher.group(1));
+            } else {
+                throw new MavenException(consoleOutput);
+            }
+        }
+        return localRepoDir;
     }
 
 }

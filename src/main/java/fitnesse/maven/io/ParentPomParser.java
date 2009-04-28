@@ -16,12 +16,13 @@ import fitnesse.maven.util.LocalRepoResolver;
 import org.apache.commons.digester.Digester;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 
 
 public class ParentPomParser {
     private LocalRepoResolver localRepoResolver;
-    private Digester digester;
 
     public ParentPomParser() {
         this(new LocalRepoResolver());
@@ -29,16 +30,13 @@ public class ParentPomParser {
 
     protected ParentPomParser(LocalRepoResolver localRepoResolver) {
         this.localRepoResolver = localRepoResolver;
-        this.digester = new Digester();
-
-        digester.addObjectCreate("project/parent", ParentPomBean.class.getName());
-        digester.addBeanPropertySetter("project/parent/groupId", "groupId");
-        digester.addBeanPropertySetter("project/parent/artifactId", "artifactId");
-        digester.addBeanPropertySetter("project/parent/version", "version");
     }
 
     public File parse(File pomFile) {
         try {
+            if (pomFile == null) {
+                return null;
+            }
             return parse(pomFile, new FileInputStream(pomFile));
         } catch (FileNotFoundException e) {
             throw new MavenException(e);
@@ -47,7 +45,7 @@ public class ParentPomParser {
 
     protected File parse(File pomFile, InputStream inputStream) {
         try {
-            ParentPomBean parentBean = (ParentPomBean) digester.parse(inputStream);
+            ParentPomBean parentBean = (ParentPomBean) createDigester().parse(inputStream);
             if (parentBean == null) {
                 return null;
             }
@@ -59,6 +57,23 @@ public class ParentPomParser {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private Digester createDigester() {
+        try {
+            Digester digester = new Digester(SAXParserFactory.newInstance().newSAXParser());
+
+            digester.addObjectCreate("project/parent", ParentPomBean.class.getName());
+            digester.addBeanPropertySetter("project/parent/groupId", "groupId");
+            digester.addBeanPropertySetter("project/parent/artifactId", "artifactId");
+            digester.addBeanPropertySetter("project/parent/version", "version");
+
+            return digester;
+        } catch (ParserConfigurationException e) {
+            throw new MavenException(e);
+        } catch (SAXException e) {
+            throw new MavenException(e);
+        }
     }
 
     public static class ParentPomBean {
@@ -91,7 +106,7 @@ public class ParentPomParser {
         }
 
         public String getFilePath() {
-            return groupId + "/" + artifactId + "/" + version + "/pom.xml";
+            return groupId + "/" + artifactId + "/" + version + "/" + artifactId + "-" + version + ".pom";
         }
     }
 }

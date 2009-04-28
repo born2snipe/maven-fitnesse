@@ -13,10 +13,10 @@
 package fitnesse.maven.util;
 
 import fitnesse.maven.io.MavenCommandShell;
+import fitnesse.maven.io.MavenException;
 import fitnesse.maven.io.PomFile;
 import junit.framework.TestCase;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.text.MessageFormat;
@@ -47,6 +47,29 @@ public class LocalRepoResolverTest extends TestCase {
         when(shell.execute(POM, "help:effective-settings")).thenReturn(consoleOutput);
 
         assertEquals(new File("c:\\Users\\dan\\.m2\\repository"), resolver.resolve(POM));
+    }
+
+    public void test_resolve_AlreadyResolved() {
+        String consoleOutput = goodResponse("c:\\Users\\dan\\.m2\\repository");
+
+        when(shell.execute(POM, "help:effective-settings")).thenReturn(consoleOutput);
+
+        assertEquals(new File("c:\\Users\\dan\\.m2\\repository"), resolver.resolve(POM));
+        assertEquals(new File("c:\\Users\\dan\\.m2\\repository"), resolver.resolve(POM));
+
+        verify(shell, times(1)).execute(POM, "help:effective-settings");
+    }
+
+    public void test_resolve_NoMatchFound() {
+        String consoleOutput = "console-output";
+        when(shell.execute(POM, "help:effective-settings")).thenReturn(consoleOutput);
+
+        try {
+            resolver.resolve(POM);
+            fail();
+        } catch (MavenException err) {
+            assertEquals(consoleOutput, err.getMessage());
+        }
     }
 
     private String goodResponse(String filePath) {

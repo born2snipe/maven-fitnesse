@@ -53,7 +53,7 @@ public class ParentPomParserTest extends TestCase {
         File file = parser.parse(POM_FILE.getFile(), new ByteArrayInputStream(pomFile.getBytes()));
 
         assertNotNull(file);
-        assertTrue(file.getPath().contains("groupId/artifactId/version/pom.xml"));
+        assertTrue(file.getPath().contains("groupId/artifactId/version/artifactId-version.pom"));
     }
 
     public void test_parse_PomHasNoParent() {
@@ -70,5 +70,7 @@ public class ParentPomParserTest extends TestCase {
         assertNull(parser.parse(POM_FILE.getFile(), new ByteArrayInputStream(pomFile.getBytes())));
     }
 
-
+    public void test_parse_NullFile() {
+        assertNull(parser.parse(null));
+    }
 }
