@@ -33,6 +33,29 @@ public class ParentPomParserTest extends TestCase {
         parser = new ParentPomParser(localRepoResolver);
     }
 
+    public void test_parse_PomHasParent_GroupIdHasPeriods() {
+        String pomFile = "<?xml version=\"1.0\"?>\n" +
+                "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">\n" +
+                "\n" +
+                "    <modelVersion>4.0.0</modelVersion>\n" +
+                "\n" +
+                "    <parent>\n" +
+                "        <groupId>fitnesse.maven.groupId</groupId>\n" +
+                "        <artifactId>artifactId</artifactId>\n" +
+                "        <version>version</version>\n" +
+                "    </parent>\n" +
+                "\n" +
+                "</project>";
+
+        when(localRepoResolver.resolve(POM_FILE)).thenReturn(PARENT_POM_FILE);
+
+        File file = parser.parse(POM_FILE.getFile(), new ByteArrayInputStream(pomFile.getBytes()));
+
+        assertNotNull(file);
+        assertTrue(file.getPath().contains("fitnesse/maven/groupId/artifactId/version/artifactId-version.pom"));
+    }
+
     public void test_parse_PomHasParent() {
         String pomFile = "<?xml version=\"1.0\"?>\n" +
                 "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +

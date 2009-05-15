@@ -106,7 +106,7 @@ public class ParentPomParser {
         }
 
         public String getFilePath() {
-            return groupId + "/" + artifactId + "/" + version + "/" + artifactId + "-" + version + ".pom";
+            return groupId.replaceAll("\\.", "/") + "/" + artifactId + "/" + version + "/" + artifactId + "-" + version + ".pom";
         }
     }
 }
