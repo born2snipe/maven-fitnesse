@@ -22,17 +22,18 @@ import java.util.List;
 
 
 public class DependencyCache {
-    public static final File CACHE_FILE = new File(System.getProperty("user.home"), ".fitnesse-maven-dependency-cache");
+    public static final File CACHE_DIR = new File(System.getProperty("user.home"), ".fitnesse-maven-dependency-cache");
     private Cache<File, CachedPom> cache;
     private FileUtil fileUtil;
 
-    public DependencyCache() {
-        this(new FileUtil());
+    public DependencyCache(String cacheFileName) {
+        this(new FileUtil(), cacheFileName);
     }
 
-    protected DependencyCache(FileUtil fileUtil) {
+    protected DependencyCache(FileUtil fileUtil, String cacheFilename) {
         this.fileUtil = fileUtil;
-        cache = new FileCache<File, CachedPom>(CACHE_FILE, new PomHandler(fileUtil));
+        CACHE_DIR.mkdirs();
+        cache = new FileCache<File, CachedPom>(new File(CACHE_DIR, cacheFilename), new PomHandler(fileUtil));
     }
 
     public void cache(File pomFile, List<String> dependencies) {

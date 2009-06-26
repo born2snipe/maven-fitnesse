@@ -17,6 +17,7 @@ import fitnesse.maven.io.MavenException;
 import fitnesse.maven.io.PomFile;
 
 import java.util.List;
+import java.io.File;
 
 
 public abstract class AbstractMavenDependencyResolver {

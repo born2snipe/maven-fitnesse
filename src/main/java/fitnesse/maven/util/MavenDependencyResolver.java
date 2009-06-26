@@ -22,14 +22,14 @@ public class MavenDependencyResolver extends AbstractMavenDependencyResolver {
     private Sys sys;
 
     public MavenDependencyResolver() {
-        this(new MavenCommandShell(), new DependencyCache(), new Sys());
+        this(new MavenCommandShell(), new DependencyCache("dependencies"), new Sys());
     }
 
 
     protected MavenDependencyResolver(MavenCommandShell commandShell, DependencyCache dependencyCache, Sys sys) {
         super(dependencyCache, commandShell);
         this.sys = sys;
-    }
+    }                                                                  
 
 
     protected List<String> handleConsoleOutput(String consoleOutput) {

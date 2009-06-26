@@ -25,7 +25,7 @@ public class MavenOutputDirectoryResolver extends AbstractMavenDependencyResolve
     private static final Pattern OUTPUT = Pattern.compile("<outputDirectory>(.+)</outputDirectory>");
 
     public MavenOutputDirectoryResolver() {
-        this(new DependencyCache(), new MavenCommandShell());
+        this(new DependencyCache("output-directories"), new MavenCommandShell());
     }
 
     protected MavenOutputDirectoryResolver(DependencyCache cache, MavenCommandShell shell) {

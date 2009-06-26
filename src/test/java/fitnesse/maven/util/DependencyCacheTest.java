@@ -31,10 +31,11 @@ public class DependencyCacheTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         fileUtil = mock(FileUtil.class);
-        cache = new DependencyCache(fileUtil);
+        cache = new DependencyCache(fileUtil, "cache");
 
-        if (DependencyCache.CACHE_FILE.exists()) {
-            DependencyCache.CACHE_FILE.delete();
+        File cacheFile = new File(DependencyCache.CACHE_DIR, "cache");
+        if (cacheFile.exists()) {
+            cacheFile.delete();
         }
     }
 
