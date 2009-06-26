@@ -12,7 +12,7 @@
  */
 package fitnesse.maven.io;
 
-import java.io.File;
+import java.io.*;
 
 
 public class FileUtil {
@@ -26,5 +26,43 @@ public class FileUtil {
 
     public boolean isDirectory(File file) {
         return file.isDirectory();
+    }
+
+    public void write(File file, Object objectMap) {
+        ObjectOutputStream out = null;
+        try {
+            out = new ObjectOutputStream(new FileOutputStream(file));
+            out.writeObject(objectMap);
+            out.flush();
+        } catch (IOException err) {
+            throw new RuntimeException(err);
+        } finally {
+            close(out);
+        }
+
+    }
+
+    public Object read(File file) {
+        ObjectInputStream input = null;
+        try {
+            input = new ObjectInputStream(new FileInputStream(file));
+            return input.readObject();
+        } catch (IOException err) {
+            throw new RuntimeException(err);
+        } catch (ClassNotFoundException err) {
+            throw new RuntimeException(err);
+        } finally {
+            close(input);
+        }
+    }
+
+    private void close(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

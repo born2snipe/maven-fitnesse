@@ -1,26 +1,25 @@
 /**
  * Copyright to the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at:
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is
  * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and limitations under the License.
  */
 package fitnesse.maven.util;
 
+import fitnesse.maven.io.FileUtil;
 import junit.framework.TestCase;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.ArrayList;
-
-import fitnesse.maven.io.FileUtil;
+import java.util.Arrays;
 
 
 public class DependencyCacheTest extends TestCase {
@@ -33,6 +32,10 @@ public class DependencyCacheTest extends TestCase {
         super.setUp();
         fileUtil = mock(FileUtil.class);
         cache = new DependencyCache(fileUtil);
+
+        if (DependencyCache.CACHE_FILE.exists()) {
+            DependencyCache.CACHE_FILE.delete();
+        }
     }
 
     public void test_hasChanged_NoCached() {

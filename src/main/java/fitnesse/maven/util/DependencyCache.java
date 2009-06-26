@@ -15,12 +15,14 @@ package fitnesse.maven.util;
 import fitnesse.maven.io.FileUtil;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 
 public class DependencyCache {
+    public static final File CACHE_FILE = new File(System.getProperty("user.home"), ".fitnesse-maven-dependency-cache");
     private Cache<File, CachedPom> cache;
     private FileUtil fileUtil;
 
@@ -30,7 +32,7 @@ public class DependencyCache {
 
     protected DependencyCache(FileUtil fileUtil) {
         this.fileUtil = fileUtil;
-        cache = new Cache<File, CachedPom>(new PomHandler(fileUtil));
+        cache = new FileCache<File, CachedPom>(CACHE_FILE, new PomHandler(fileUtil));
     }
 
     public void cache(File pomFile, List<String> dependencies) {
@@ -48,7 +50,7 @@ public class DependencyCache {
         return cachedPom.dependencies;
     }
 
-    private static class CachedPom {
+    private static class CachedPom implements Serializable {
         public final List<String> dependencies;
         public final long lastModified;
         public final File file;
@@ -60,7 +62,7 @@ public class DependencyCache {
         }
     }
 
-    private static class PomHandler implements Cache.IsOutOfDateHandler<CachedPom> {
+    private static class PomHandler implements FileCache.IsOutOfDateHandler<CachedPom> {
         private FileUtil fileUtil;
 
         private PomHandler(FileUtil fileUtil) {
