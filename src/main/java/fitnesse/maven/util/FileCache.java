@@ -12,10 +12,10 @@
  */
 package fitnesse.maven.util;
 
-import com.thoughtworks.xstream.XStream;
 import fitnesse.maven.io.FileUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,8 +51,15 @@ public class FileCache<K, V> implements Cache<K, V> {
         V value = cache.get(key);
         if (value == null) {
             if (fileUtil.exists(cacheFile)) {
-                cache = (Map<K, V>) serializer.deserialize(fileUtil.read(cacheFile));
-                return cache.get(key);
+                try {
+                    cache = (Map<K, V>) serializer.deserialize(fileUtil.read(cacheFile));
+                    return cache.get(key);
+                } catch (IOException err) {
+                    throw new RuntimeException(err);
+                } catch (Exception err) {
+                    fileUtil.delete(cacheFile);
+                    return null;
+                }
             }
         }
         return value;
@@ -71,6 +78,7 @@ public class FileCache<K, V> implements Cache<K, V> {
 
     public static interface Serializer {
         String serialize(Object obj);
+
         Object deserialize(String content);
     }
 }

@@ -42,7 +42,7 @@ public class FileUtil {
 
     }
 
-    public String read(File file) {
+    public String read(File file) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] buffer = new byte[2048];
         int len = 0;
@@ -53,8 +53,6 @@ public class FileUtil {
                 baos.write(buffer, 0, len);
             }
             return new String(baos.toByteArray(), "UTF-8");
-        } catch (IOException err) {
-            throw new RuntimeException(err);
         } finally {
             close(input);
         }
@@ -68,5 +66,9 @@ public class FileUtil {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public void delete(File file) {
+        if (file.exists()) file.delete();
     }
 }

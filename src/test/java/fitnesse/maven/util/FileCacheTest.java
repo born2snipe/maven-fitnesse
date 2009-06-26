@@ -17,6 +17,7 @@ import junit.framework.TestCase;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +35,29 @@ public class FileCacheTest extends TestCase {
         handler = mock(FileCache.IsOutOfDateHandler.class);
         serializer = mock(FileCache.Serializer.class);
         cache = new FileCache<String, Object>(fileUtil, CACHE_FILE, handler, serializer);
+    }
+
+    public void test_get_ProblemDeserializingFileContent() throws IOException {
+        when(fileUtil.exists(CACHE_FILE)).thenReturn(true);
+        when(fileUtil.read(CACHE_FILE)).thenReturn("content");
+        when(serializer.deserialize("content")).thenThrow(new RuntimeException("wtf?!"));
+
+        assertNull(cache.get("key"));
+
+        verify(fileUtil).delete(CACHE_FILE);
+    }
+
+    public void test_get_ProblemReadingFile() throws IOException {
+        when(fileUtil.exists(CACHE_FILE)).thenReturn(true);
+        IOException realError = new IOException("wtf!?");
+        when(fileUtil.read(CACHE_FILE)).thenThrow(realError);
+
+        try {
+            cache.get("key");
+            fail();
+        } catch (RuntimeException err) {
+            assertSame(realError, err.getCause());
+        }
     }
 
     public void test_hasChanged_HasChanged() {
@@ -62,7 +86,7 @@ public class FileCacheTest extends TestCase {
         assertNull(cache.get("key"));
     }
 
-    public void test_get_CouldNotFindInCacheIsInFile() {
+    public void test_get_CouldNotFindInCacheIsInFile() throws IOException {
         Map<String, Object> fileCache = new HashMap<String, Object>();
         fileCache.put("key", "value");
 
