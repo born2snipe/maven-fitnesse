@@ -1,0 +1,9 @@
+h1. How to use the Pom Widget?
+
+<ol>
+	<li>You will need to add the maven-fitnesse jar to the classpath of your FitNesse server</li>
+	<li>In the FitNesse <b>plugins.properties</b> add <b>fitnesse.maven.widget.PomWidget</b> to the WikiWidgets property</li>
+	<li>Now on your wiki page add <b>!pom [path to pom file]</b>, this will add the output directories and the dependencies to the FitNesse classpath</li>
+</ol>
+
+h4. Note: This widget assumes the “mvn” command is in the PATH
