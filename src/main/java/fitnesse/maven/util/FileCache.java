@@ -12,6 +12,7 @@
  */
 package fitnesse.maven.util;
 
+import com.thoughtworks.xstream.XStream;
 import fitnesse.maven.io.FileUtil;
 
 import java.io.File;
@@ -24,30 +25,33 @@ public class FileCache<K, V> implements Cache<K, V> {
     private FileUtil fileUtil;
     private File cacheFile;
     private IsOutOfDateHandler handler;
+    private Serializer serializer;
     private Map<K, V> cache = new HashMap<K, V>();
 
-    public FileCache(File cacheFile, IsOutOfDateHandler handler) {
-        this(new FileUtil(), cacheFile, handler);
+
+    public FileCache(File cacheFile, IsOutOfDateHandler handler, Serializer serializer) {
+        this(new FileUtil(), cacheFile, handler, serializer);
     }
 
-    public FileCache(FileUtil fileUtil, File cacheFile, IsOutOfDateHandler handler) {
+    public FileCache(FileUtil fileUtil, File cacheFile, IsOutOfDateHandler handler, Serializer serializer) {
         this.fileUtil = fileUtil;
         this.cacheFile = cacheFile;
         this.handler = handler;
+        this.serializer = serializer;
     }
 
     public void cache(K key, V value) {
         if (!(value instanceof Serializable))
             throw new IllegalArgumentException(value.getClass().getName() + " is not serializable");
         cache.put(key, value);
-        fileUtil.write(cacheFile, cache);
+        fileUtil.write(cacheFile, serializer.serialize(cache));
     }
 
     public V get(K key) {
         V value = cache.get(key);
         if (value == null) {
             if (fileUtil.exists(cacheFile)) {
-                cache = (Map<K, V>) fileUtil.read(cacheFile);
+                cache = (Map<K, V>) serializer.deserialize(fileUtil.read(cacheFile));
                 return cache.get(key);
             }
         }
@@ -63,5 +67,10 @@ public class FileCache<K, V> implements Cache<K, V> {
 
     public static interface IsOutOfDateHandler<V> {
         boolean hasChanged(V value);
+    }
+
+    public static interface Serializer {
+        String serialize(Object obj);
+        Object deserialize(String content);
     }
 }

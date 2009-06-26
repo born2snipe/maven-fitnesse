@@ -26,12 +26,14 @@ public class FileCacheTest extends TestCase {
     private FileUtil fileUtil;
     private FileCache<String, Object> cache;
     private FileCache.IsOutOfDateHandler handler;
+    private FileCache.Serializer serializer;
 
     protected void setUp() throws Exception {
         super.setUp();
         fileUtil = mock(FileUtil.class);
         handler = mock(FileCache.IsOutOfDateHandler.class);
-        cache = new FileCache<String, Object>(fileUtil, CACHE_FILE, handler);
+        serializer = mock(FileCache.Serializer.class);
+        cache = new FileCache<String, Object>(fileUtil, CACHE_FILE, handler, serializer);
     }
 
     public void test_hasChanged_HasChanged() {
@@ -64,8 +66,9 @@ public class FileCacheTest extends TestCase {
         Map<String, Object> fileCache = new HashMap<String, Object>();
         fileCache.put("key", "value");
 
+        when(serializer.deserialize("content")).thenReturn(fileCache);
         when(fileUtil.exists(CACHE_FILE)).thenReturn(true);
-        when(fileUtil.read(CACHE_FILE)).thenReturn(fileCache);
+        when(fileUtil.read(CACHE_FILE)).thenReturn("content");
 
         assertEquals("value", cache.get("key"));
     }
@@ -77,12 +80,14 @@ public class FileCacheTest extends TestCase {
     }
 
     public void test_cache() {
-        cache.cache("key", "value");
-
         Map<String, Object> values = new HashMap<String, Object>();
         values.put("key", "value");
 
-        verify(fileUtil).write(CACHE_FILE, values);
+        when(serializer.serialize(values)).thenReturn("content");
+
+        cache.cache("key", "value");
+
+        verify(fileUtil).write(CACHE_FILE, "content");
     }
 
     public void test_cache_NotSerializable() {

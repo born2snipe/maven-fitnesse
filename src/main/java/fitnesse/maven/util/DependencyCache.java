@@ -17,8 +17,9 @@ import fitnesse.maven.io.FileUtil;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+
+import com.thoughtworks.xstream.XStream;
 
 
 public class DependencyCache {
@@ -33,7 +34,7 @@ public class DependencyCache {
     protected DependencyCache(FileUtil fileUtil, String cacheFilename) {
         this.fileUtil = fileUtil;
         CACHE_DIR.mkdirs();
-        cache = new FileCache<File, CachedPom>(new File(CACHE_DIR, cacheFilename), new PomHandler(fileUtil));
+        cache = new FileCache<File, CachedPom>(new File(CACHE_DIR, cacheFilename), new PomHandler(fileUtil), new XStreamSerializer());
     }
 
     public void cache(File pomFile, List<String> dependencies) {
@@ -58,7 +59,7 @@ public class DependencyCache {
 
         private CachedPom(List<String> dependencies, long lastModified, File file) {
             this.file = file;
-            this.dependencies = Collections.unmodifiableList(dependencies);
+            this.dependencies = dependencies;
             this.lastModified = lastModified;
         }
     }
@@ -72,6 +73,24 @@ public class DependencyCache {
 
         public boolean hasChanged(CachedPom value) {
             return fileUtil.lastModified(value.file) != value.lastModified;
+        }
+    }
+
+    private static class XStreamSerializer implements FileCache.Serializer {
+        private XStream xstream = new XStream();
+
+        private XStreamSerializer() {
+            xstream.alias("pom", CachedPom.class);
+            xstream.useAttributeFor(long.class);
+            xstream.useAttributeFor(File.class);
+        }
+
+        public String serialize(Object obj) {
+            return xstream.toXML(obj);
+        }
+
+        public Object deserialize(String content) {
+            return xstream.fromXML(content);
         }
     }
 }

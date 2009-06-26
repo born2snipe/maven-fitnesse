@@ -28,11 +28,11 @@ public class FileUtil {
         return file.isDirectory();
     }
 
-    public void write(File file, Object objectMap) {
-        ObjectOutputStream out = null;
+    public void write(File file, String content) {
+        OutputStream out = null;
         try {
-            out = new ObjectOutputStream(new FileOutputStream(file));
-            out.writeObject(objectMap);
+            out = new FileOutputStream(file);
+            out.write(content.getBytes("UTF-8"));
             out.flush();
         } catch (IOException err) {
             throw new RuntimeException(err);
@@ -42,14 +42,18 @@ public class FileUtil {
 
     }
 
-    public Object read(File file) {
-        ObjectInputStream input = null;
+    public String read(File file) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[2048];
+        int len = 0;
+        InputStream input = null;
         try {
-            input = new ObjectInputStream(new FileInputStream(file));
-            return input.readObject();
+            input = new FileInputStream(file);
+            while ((len = input.read(buffer)) != -1) {
+                baos.write(buffer, 0, len);
+            }
+            return new String(baos.toByteArray(), "UTF-8");
         } catch (IOException err) {
-            throw new RuntimeException(err);
-        } catch (ClassNotFoundException err) {
             throw new RuntimeException(err);
         } finally {
             close(input);
