@@ -5,7 +5,7 @@
     <groupId>fitnesse</groupId>
     <artifactId>maven-fitnesse</artifactId>
     <packaging>jar</packaging>
-    <version>1.4</version>
+    <version>1.5-SNAPSHOT</version>
     <name>maven-fitnesse</name>
 
     <scm>
