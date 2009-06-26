@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 
 public class LocalRepoResolver {
-    private static final Pattern LOCAL_REPO_PATTERN = Pattern.compile("<localRepository>(.+)</localRepository>");
+    private static final Pattern LOCAL_REPO_PATTERN = Pattern.compile("<localRepository.*?>(.+)</localRepository>");
     private MavenCommandShell shell;
     private File localRepoDir;
 
