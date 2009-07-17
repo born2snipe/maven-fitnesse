@@ -15,27 +15,29 @@ package fitnesse.maven.io;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteException;
+import org.apache.commons.exec.PumpStreamHandler;
 
 
 public class CommandShell {
     public String execute(File workingDir, String... commands) {
-        ProcessBuilder processBuilder = new ProcessBuilder();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        CommandLine commandLine = CommandLine.parse(commands[0]);
+        for (int i=1;i<commands.length;i++) {
+            commandLine.addArgument(commands[i]);
+        }
+        DefaultExecutor executor = new DefaultExecutor();
         try {
-            Process process = processBuilder.directory(workingDir).command(commands).start();
-            byte buffer[] = new byte[2048];
-            int len = -1;
-            InputStream input = process.getInputStream();
-            while ((len = input.read(buffer)) != -1) {
-                baos.write(buffer, 0, len);
-            }
-            process.waitFor();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            executor.setStreamHandler(new PumpStreamHandler(baos));
+            executor.setWorkingDirectory(workingDir);
+            executor.execute(commandLine);
+            return new String(baos.toByteArray());
+        } catch (ExecuteException e) {
+            throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
-        return new String(baos.toByteArray());
     }
 }
