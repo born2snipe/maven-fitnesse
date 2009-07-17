@@ -16,6 +16,11 @@ import java.io.*;
 
 
 public class FileUtil {
+
+    public void mkdirs(File file) {
+        file.mkdirs();
+    }
+
     public boolean exists(File file) {
         return file != null && file.exists();
     }

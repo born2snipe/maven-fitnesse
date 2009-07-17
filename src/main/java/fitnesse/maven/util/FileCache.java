@@ -44,6 +44,9 @@ public class FileCache<K, V> implements Cache<K, V> {
         if (!(value instanceof Serializable))
             throw new IllegalArgumentException(value.getClass().getName() + " is not serializable");
         cache.put(key, value);
+        if (!fileUtil.exists(cacheFile.getParentFile())) {
+            fileUtil.mkdirs(cacheFile.getParentFile());
+        }
         fileUtil.write(cacheFile, serializer.serialize(cache));
     }
 

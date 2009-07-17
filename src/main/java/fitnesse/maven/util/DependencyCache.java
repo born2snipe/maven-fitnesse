@@ -33,7 +33,6 @@ public class DependencyCache {
 
     protected DependencyCache(FileUtil fileUtil, String cacheFilename) {
         this.fileUtil = fileUtil;
-        CACHE_DIR.mkdirs();
         cache = new FileCache<File, CachedPom>(new File(CACHE_DIR, cacheFilename), new PomHandler(fileUtil), new XStreamSerializer());
     }
 

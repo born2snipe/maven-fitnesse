@@ -107,11 +107,25 @@ public class FileCacheTest extends TestCase {
         Map<String, Object> values = new HashMap<String, Object>();
         values.put("key", "value");
 
+        when(fileUtil.exists(CACHE_FILE)).thenReturn(true);
         when(serializer.serialize(values)).thenReturn("content");
 
         cache.cache("key", "value");
 
         verify(fileUtil).write(CACHE_FILE, "content");
+    }
+
+    public void test_cache_DirectoryDoesNotExist() {
+        Map<String, Object> values = new HashMap<String, Object>();
+        values.put("key", "value");
+
+        when(fileUtil.exists(CACHE_FILE.getParentFile())).thenReturn(false);
+        when(serializer.serialize(values)).thenReturn("content");
+
+        cache.cache("key", "value");
+
+        verify(fileUtil).write(CACHE_FILE, "content");
+        verify(fileUtil).mkdirs(CACHE_FILE.getParentFile());
     }
 
     public void test_cache_NotSerializable() {
