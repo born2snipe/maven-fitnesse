@@ -15,7 +15,6 @@ package fitnesse.maven.util;
 import fitnesse.maven.io.MavenCommandShell;
 import fitnesse.maven.io.MavenException;
 import fitnesse.maven.io.PomFile;
-import fitnesse.util.StringUtil;
 import junit.framework.TestCase;
 import static org.mockito.Mockito.*;
 
@@ -23,6 +22,7 @@ import java.io.File;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.lang.StringUtils;
 
 
 public class MavenDependencyResolverTest extends TestCase {
@@ -286,7 +286,7 @@ public class MavenDependencyResolverTest extends TestCase {
 
 
     private String createMavenOutput(String delimiter, String... jars) {
-        return MessageFormat.format(CONSOLE_OUTPUT, StringUtil.join(Arrays.asList(jars), delimiter));
+        return MessageFormat.format(CONSOLE_OUTPUT, StringUtils.join(Arrays.asList(jars), delimiter));
     }
 
 
