@@ -29,7 +29,7 @@ import fitnesse.wikitext.widgets.ParentWidget;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -56,6 +56,7 @@ public class PomWidget extends ClasspathWidget {
     private String cssClass = "collapse_rim";
     private String errorMessage;
     private String pomFileInput;
+    private boolean unexpectedErrorOccurred;
 
 
     static {
@@ -82,8 +83,9 @@ public class PomWidget extends ClasspathWidget {
             errorMessage = err.getMessage();
         } catch (Exception err) {
             ByteArrayOutputStream output = new ByteArrayOutputStream();
-            err.printStackTrace(new PrintWriter(output));
+            err.printStackTrace(new PrintStream(output));
             errorMessage = new String(output.toByteArray());
+            unexpectedErrorOccurred = true;
         }
     }
 
@@ -101,7 +103,9 @@ public class PomWidget extends ClasspathWidget {
         RawHtml bodyElement = new RawHtml(childHtml());
         boolean expanded = false;
 
-        if (pomFile == null) {
+        if (unexpectedErrorOccurred) {
+            titleElement = createTitleElement("PomWidget encountered an unexpected error!!");
+        } else if (pomFile == null) {
             titleElement = createTitleElement("Maven POM could NOT be found: " + pomFileInput);
         } else {
             titleElement = createTitleElement("Maven POM: " + pomFile.getFile());

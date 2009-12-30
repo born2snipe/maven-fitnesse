@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -59,14 +60,19 @@ public class PomWidgetTest {
 
     @Test
     public void pomResolverThrowsAnException() throws Exception {
-        RuntimeException realError = new RuntimeException("real error");
+        RuntimeException realError = new RuntimeException("real error") {
+            @Override
+            public void printStackTrace(PrintStream s) {
+                s.append("stacktrace");
+            }
+        };
 
         when(mavenPomResolver.resolve(POM_FILE.getFile())).thenThrow(realError);
 
 
         PomWidget widget = new PomWidget(parentWidget, "!pom /blah/pom.xml");
 
-        assertCollapseElement(false, "Maven POM could NOT be found: /blah/pom.xml", "<pre></pre>", widget.render());
+        assertCollapseElement(false, "PomWidget encountered an unexpected error!!", "<pre>stacktrace</pre>", widget.render());
     }
 
     @Test
