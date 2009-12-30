@@ -13,28 +13,32 @@
 package fitnesse.maven.io;
 
 import fitnesse.maven.util.Sys;
-import junit.framework.TestCase;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.Arrays;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-public class MavenCommandShellTest extends TestCase {
+
+public class MavenCommandShellTest {
     private static final PomFile POM_FILE = new PomFile(new File("blah/pom.xml"));
     private CommandShell shell;
     private MavenCommandShell mvnShell;
     private Sys sys;
 
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         sys = mock(Sys.class);
         shell = mock(CommandShell.class);
         mvnShell = new MavenCommandShell(shell, sys);
     }
 
 
+    @Test
     public void test_execute_WithOutputHandler() {
         when(sys.isWindows()).thenReturn(false);
         when(shell.execute(POM_FILE.getDirectory(), "mvn", "clean", "install")).thenReturn("1,2,3");
@@ -48,6 +52,7 @@ public class MavenCommandShellTest extends TestCase {
         assertEquals(Arrays.asList("1", "2", "3"), mvnShell.execute(POM_FILE, handler, "clean", "install"));
     }
 
+    @Test
     public void test_execute_Unix() {
         when(sys.isWindows()).thenReturn(false);
         when(shell.execute(POM_FILE.getDirectory(), "mvn", "clean", "install")).thenReturn("output");
@@ -55,6 +60,7 @@ public class MavenCommandShellTest extends TestCase {
         assertEquals("output", mvnShell.execute(POM_FILE, "clean", "install"));
     }
 
+    @Test
     public void test_execute_Windows_PomFile() {
         when(sys.isWindows()).thenReturn(true);
         when(shell.execute(POM_FILE.getDirectory(), "mvn.bat", "clean", "install")).thenReturn("windows output");
@@ -62,6 +68,7 @@ public class MavenCommandShellTest extends TestCase {
         assertEquals("windows output", mvnShell.execute(POM_FILE, "clean", "install"));
     }
 
+    @Test
     public void test_execute_Windows_File() {
         when(sys.isWindows()).thenReturn(true);
         when(shell.execute(POM_FILE.getDirectory(), "mvn.bat", "clean", "install")).thenReturn("windows output");

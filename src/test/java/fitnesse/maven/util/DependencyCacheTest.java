@@ -13,23 +13,26 @@
 package fitnesse.maven.util;
 
 import fitnesse.maven.io.FileUtil;
-import junit.framework.TestCase;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-public class DependencyCacheTest extends TestCase {
+
+public class DependencyCacheTest {
     private static final File POM_FILE = new File("pom.xml");
 
     private FileUtil fileUtil;
     private DependencyCache cache;
 
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         fileUtil = mock(FileUtil.class);
         cache = new DependencyCache(fileUtil, "cache");
 
@@ -39,11 +42,13 @@ public class DependencyCacheTest extends TestCase {
         }
     }
 
+    @Test
     public void test_hasChanged_NoCached() {
         assertTrue(cache.hasChanged(POM_FILE));
         assertEquals(new ArrayList(), cache.getDependencies(POM_FILE));
     }
 
+    @Test
     public void test_hasChanged_Unchanged() {
         when(fileUtil.lastModified(POM_FILE)).thenReturn(1L);
 
@@ -53,6 +58,7 @@ public class DependencyCacheTest extends TestCase {
         assertEquals(Arrays.asList("junit.jar"), cache.getDependencies(POM_FILE));
     }
 
+    @Test
     public void test_hasChanged_Changed() {
         when(fileUtil.lastModified(POM_FILE)).thenReturn(1L).thenReturn(2L);
 

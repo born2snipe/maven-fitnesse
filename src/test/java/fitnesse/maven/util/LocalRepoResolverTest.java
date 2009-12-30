@@ -15,24 +15,29 @@ package fitnesse.maven.util;
 import fitnesse.maven.io.MavenCommandShell;
 import fitnesse.maven.io.MavenException;
 import fitnesse.maven.io.PomFile;
-import junit.framework.TestCase;
-import static org.mockito.Mockito.*;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.text.MessageFormat;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 
-public class LocalRepoResolverTest extends TestCase {
+
+public class LocalRepoResolverTest {
     private static final PomFile POM = new PomFile(new File("blah/pom.xml"));
     private MavenCommandShell shell;
     private LocalRepoResolver resolver;
 
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         shell = mock(MavenCommandShell.class);
         resolver = new LocalRepoResolver(shell);
     }
 
+    @Test
     public void test_resolve_NewMaven() {
         String consoleOutput = goodMavenResponse("/Users/dan/.m2/repository");
 
@@ -41,6 +46,7 @@ public class LocalRepoResolverTest extends TestCase {
         assertEquals(new File("/Users/dan/.m2/repository"), resolver.resolve(POM));
     }
 
+    @Test
     public void test_resolve_Unix() {
         String consoleOutput = goodOldMavenResponse("/Users/dan/.m2/repository");
 
@@ -49,6 +55,7 @@ public class LocalRepoResolverTest extends TestCase {
         assertEquals(new File("/Users/dan/.m2/repository"), resolver.resolve(POM));
     }
 
+    @Test
     public void test_resolve_Windows() {
         String consoleOutput = goodOldMavenResponse("c:\\Users\\dan\\.m2\\repository");
 
@@ -57,6 +64,7 @@ public class LocalRepoResolverTest extends TestCase {
         assertEquals(new File("c:\\Users\\dan\\.m2\\repository"), resolver.resolve(POM));
     }
 
+    @Test
     public void test_resolve_AlreadyResolved() {
         String consoleOutput = goodOldMavenResponse("c:\\Users\\dan\\.m2\\repository");
 
@@ -68,6 +76,7 @@ public class LocalRepoResolverTest extends TestCase {
         verify(shell, times(1)).execute(POM, "help:effective-settings");
     }
 
+    @Test
     public void test_resolve_NoMatchFound() {
         String consoleOutput = "console-output";
         when(shell.execute(POM, "help:effective-settings")).thenReturn(consoleOutput);

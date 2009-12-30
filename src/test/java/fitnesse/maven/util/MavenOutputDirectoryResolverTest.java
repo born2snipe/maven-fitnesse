@@ -15,30 +15,33 @@ package fitnesse.maven.util;
 import fitnesse.maven.io.MavenCommandShell;
 import fitnesse.maven.io.MavenException;
 import fitnesse.maven.io.PomFile;
-import junit.framework.TestCase;
-import static org.mockito.Mockito.*;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 
-public class MavenOutputDirectoryResolverTest extends TestCase {
+
+public class MavenOutputDirectoryResolverTest {
     private static final PomFile POM_FILE = new PomFile(new File("pom.xml"));
     private MavenCommandShell shell;
     private DependencyCache cache;
     private MavenOutputDirectoryResolver resolver;
 
-
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         shell = mock(MavenCommandShell.class);
         cache = mock(DependencyCache.class);
         resolver = new MavenOutputDirectoryResolver(cache, shell);
     }
 
-
+    @Test
     public void test_resolve_BuildError_Windows() {
         String consoleOutput = "[INFO] Scanning for projects...\n" +
                 "[INFO] ------------------------------------------------------------------------\n" +
@@ -119,7 +122,7 @@ public class MavenOutputDirectoryResolverTest extends TestCase {
         }
     }
 
-
+    @Test
     public void test_resolve_NotCached_Windows() {
         String consoleOutput = consoleOutput("C:\\target\\classes", "C:\\target\\test-classes");
 
@@ -133,7 +136,7 @@ public class MavenOutputDirectoryResolverTest extends TestCase {
         verify(cache).cache(POM_FILE.getFile(), outputDirs);
     }
 
-
+    @Test
     public void test_resolve_NotCached_Unix() {
         String consoleOutput = consoleOutput("/target/classes", "/target/test-classes");
 
@@ -147,7 +150,7 @@ public class MavenOutputDirectoryResolverTest extends TestCase {
         verify(cache).cache(POM_FILE.getFile(), outputDirs);
     }
 
-
+    @Test
     public void test_execute_Cached() {
         List<String> directories = Arrays.asList("/target/classes");
 

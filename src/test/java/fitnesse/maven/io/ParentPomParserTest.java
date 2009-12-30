@@ -13,26 +13,30 @@
 package fitnesse.maven.io;
 
 import fitnesse.maven.util.LocalRepoResolver;
-import junit.framework.TestCase;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-public class ParentPomParserTest extends TestCase {
+
+public class ParentPomParserTest {
     private static final PomFile POM_FILE = new PomFile(new File("blah/pom.xml"));
     private static final File PARENT_POM_FILE = new File("parent/pom.xml");
     private LocalRepoResolver localRepoResolver;
     private ParentPomParser parser;
 
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         localRepoResolver = mock(LocalRepoResolver.class);
         parser = new ParentPomParser(localRepoResolver);
     }
 
+    @Test
     public void test_parse_PomHasParent_GroupIdHasPeriods() {
         String pomFile = "<?xml version=\"1.0\"?>\n" +
                 "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
@@ -56,6 +60,7 @@ public class ParentPomParserTest extends TestCase {
         assertTrue(file.getPath().contains("fitnesse/maven/groupId/artifactId/version/artifactId-version.pom"));
     }
 
+    @Test
     public void test_parse_PomHasParent() {
         String pomFile = "<?xml version=\"1.0\"?>\n" +
                 "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
@@ -79,6 +84,7 @@ public class ParentPomParserTest extends TestCase {
         assertTrue(file.getPath().contains("groupId/artifactId/version/artifactId-version.pom"));
     }
 
+    @Test
     public void test_parse_PomHasNoParent() {
         String pomFile = "<?xml version=\"1.0\"?>\n" +
                 "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
@@ -93,6 +99,7 @@ public class ParentPomParserTest extends TestCase {
         assertNull(parser.parse(POM_FILE.getFile(), new ByteArrayInputStream(pomFile.getBytes())));
     }
 
+    @Test
     public void test_parse_NullFile() {
         assertNull(parser.parse(null));
     }

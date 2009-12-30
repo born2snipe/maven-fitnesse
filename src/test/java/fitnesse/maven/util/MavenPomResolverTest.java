@@ -15,14 +15,18 @@ package fitnesse.maven.util;
 import fitnesse.maven.io.FileUtil;
 import fitnesse.maven.io.ParentPomParser;
 import fitnesse.maven.io.PomFile;
-import junit.framework.TestCase;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-public class MavenPomResolverTest extends TestCase {
+
+public class MavenPomResolverTest {
     private static final File DIR = new File("dir");
     private static final File FILE = new File(DIR, "pom.xml");
     private static final PomFile POM = new PomFile(FILE);
@@ -30,13 +34,14 @@ public class MavenPomResolverTest extends TestCase {
     private MavenPomResolver resolver;
     private ParentPomParser parentPomParser;
 
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         fileUtil = mock(FileUtil.class);
         parentPomParser = mock(ParentPomParser.class);
         resolver = new MavenPomResolver(fileUtil, parentPomParser);
     }
 
+    @Test
     public void test_resolve_File_ParentHasParent() {
         File parent = new File("parent/pom.xml");
         File parentOfParent = new File("parentOfParent/pom.xml");
@@ -56,6 +61,7 @@ public class MavenPomResolverTest extends TestCase {
         assertNull(pomFile.getParent().getParent().getParent());
     }
 
+    @Test
     public void test_resolve_File_HasParent() {
         File parent = new File("parent/pom.xml");
 
@@ -68,6 +74,7 @@ public class MavenPomResolverTest extends TestCase {
         assertEquals(new PomFile(parent), pomFile.getParent());
     }
 
+    @Test
     public void test_resolve_File_Exists_NoParent() {
         when(fileUtil.isDirectory(FILE)).thenReturn(false);
         when(fileUtil.exists(FILE)).thenReturn(true);
@@ -75,6 +82,7 @@ public class MavenPomResolverTest extends TestCase {
         assertEquals(POM, resolver.resolve(FILE));
     }
 
+    @Test
     public void test_resolve_File_DoesNotExist() {
         when(fileUtil.isDirectory(FILE)).thenReturn(false);
         when(fileUtil.exists(FILE)).thenReturn(false);
@@ -82,6 +90,7 @@ public class MavenPomResolverTest extends TestCase {
         assertNull(resolver.resolve(FILE));
     }
 
+    @Test
     public void test_resolve_Dir_DoesNotExist() {
         when(fileUtil.isDirectory(DIR)).thenReturn(true);
         when(fileUtil.exists(DIR)).thenReturn(false);
@@ -89,6 +98,7 @@ public class MavenPomResolverTest extends TestCase {
         assertNull(resolver.resolve(FILE));
     }
 
+    @Test
     public void test_resolve_Dir_Exist_NoParent() {
         when(fileUtil.isDirectory(DIR)).thenReturn(true);
         when(fileUtil.exists(DIR)).thenReturn(true);

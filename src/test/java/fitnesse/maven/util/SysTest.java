@@ -12,39 +12,48 @@
  */
 package fitnesse.maven.util;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 
-public class SysTest extends TestCase {
+public class SysTest {
     private String original;
     private Sys sys;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         sys = new Sys();
         original = System.getProperty("os.name");
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         System.setProperty("os.name", original);
     }
 
+    @Test
     public void test_isWindows_Mixedcase() {
         System.setProperty("os.name", "Win");
         assertTrue(sys.isWindows());
     }
 
+    @Test
     public void test_isWindows_Lowercase() {
         System.setProperty("os.name", "win");
         assertTrue(sys.isWindows());
     }
 
+    @Test
     public void test_isWindows_Uppercase() {
         System.setProperty("os.name", "WIN");
         assertTrue(sys.isWindows());
     }
 
+    @Test
     public void test_isWindows_NotWindows() {
         System.setProperty("os.name", "does not matter");
         assertFalse(sys.isWindows());

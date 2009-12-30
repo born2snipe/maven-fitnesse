@@ -13,30 +13,34 @@
 package fitnesse.maven.util;
 
 import fitnesse.maven.io.FileUtil;
-import junit.framework.TestCase;
-import static org.mockito.Mockito.*;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
-public class FileCacheTest extends TestCase {
+
+public class FileCacheTest {
     private static final File CACHE_FILE = new File(".maven-fitnesse-cache");
     private FileUtil fileUtil;
     private FileCache<String, Object> cache;
     private FileCache.IsOutOfDateHandler handler;
     private FileCache.Serializer serializer;
 
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         fileUtil = mock(FileUtil.class);
         handler = mock(FileCache.IsOutOfDateHandler.class);
         serializer = mock(FileCache.Serializer.class);
         cache = new FileCache<String, Object>(fileUtil, CACHE_FILE, handler, serializer);
     }
 
+    @Test
     public void test_get_ProblemDeserializingFileContent() throws IOException {
         when(fileUtil.exists(CACHE_FILE)).thenReturn(true);
         when(fileUtil.read(CACHE_FILE)).thenReturn("content");
@@ -47,6 +51,7 @@ public class FileCacheTest extends TestCase {
         verify(fileUtil).delete(CACHE_FILE);
     }
 
+    @Test
     public void test_get_ProblemReadingFile() throws IOException {
         when(fileUtil.exists(CACHE_FILE)).thenReturn(true);
         IOException realError = new IOException("wtf!?");
@@ -60,6 +65,7 @@ public class FileCacheTest extends TestCase {
         }
     }
 
+    @Test
     public void test_hasChanged_HasChanged() {
         cache.cache("key", "value");
 
@@ -68,6 +74,7 @@ public class FileCacheTest extends TestCase {
         assertTrue(cache.hasChanged("key"));
     }
 
+    @Test
     public void test_hasChanged_HasNotChanged() {
         cache.cache("key", "value");
 
@@ -76,16 +83,19 @@ public class FileCacheTest extends TestCase {
         assertFalse(cache.hasChanged("key"));
     }
 
+    @Test
     public void test_hasChanged_NotInCache() {
         assertTrue(cache.hasChanged("key"));
     }
 
+    @Test
     public void test_get_CouldNotFindInCacheFileDoesNotExist() {
         when(fileUtil.exists(CACHE_FILE)).thenReturn(false);
 
         assertNull(cache.get("key"));
     }
 
+    @Test
     public void test_get_CouldNotFindInCacheIsInFile() throws IOException {
         Map<String, Object> fileCache = new HashMap<String, Object>();
         fileCache.put("key", "value");
@@ -97,12 +107,14 @@ public class FileCacheTest extends TestCase {
         assertEquals("value", cache.get("key"));
     }
 
+    @Test
     public void test_get_AlreadyLoadedInMemory() {
         cache.cache("key", "value");
 
         assertEquals("value", cache.get("key"));
     }
 
+    @Test
     public void test_cache() {
         Map<String, Object> values = new HashMap<String, Object>();
         values.put("key", "value");
@@ -115,6 +127,7 @@ public class FileCacheTest extends TestCase {
         verify(fileUtil).write(CACHE_FILE, "content");
     }
 
+    @Test
     public void test_cache_DirectoryDoesNotExist() {
         Map<String, Object> values = new HashMap<String, Object>();
         values.put("key", "value");
@@ -128,6 +141,7 @@ public class FileCacheTest extends TestCase {
         verify(fileUtil).mkdirs(CACHE_FILE.getParentFile());
     }
 
+    @Test
     public void test_cache_NotSerializable() {
         try {
             cache.cache("key", new NotSerializable());

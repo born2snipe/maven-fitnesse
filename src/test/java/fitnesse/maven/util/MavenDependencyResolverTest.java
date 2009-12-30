@@ -15,17 +15,20 @@ package fitnesse.maven.util;
 import fitnesse.maven.io.MavenCommandShell;
 import fitnesse.maven.io.MavenException;
 import fitnesse.maven.io.PomFile;
-import junit.framework.TestCase;
-import static org.mockito.Mockito.*;
+import org.apache.commons.lang.StringUtils;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.lang.StringUtils;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 
-public class MavenDependencyResolverTest extends TestCase {
+public class MavenDependencyResolverTest {
     private static final PomFile POM_FILE = new PomFile(new File("pom.xml"));
     private static final String CONSOLE_OUTPUT = "[INFO] Scanning for projects...\n" +
             "[INFO] Searching repository for plugin with prefix: 'dependency'.\n" +
@@ -49,16 +52,15 @@ public class MavenDependencyResolverTest extends TestCase {
     private MavenDependencyResolver resolver;
     private Sys sys;
 
-
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         sys = mock(Sys.class);
         commandShell = mock(MavenCommandShell.class);
         dependencyCache = mock(DependencyCache.class);
         resolver = new MavenDependencyResolver(commandShell, dependencyCache, sys);
     }
 
-
+    @Test
     public void test_UnresolvableDependency() {
         String consoleOutput = "[INFO] Scanning for projects...\n" +
                 "[INFO] Searching repository for plugin with prefix: 'dependency'.\n" +
@@ -123,6 +125,7 @@ public class MavenDependencyResolverTest extends TestCase {
         }
     }
 
+    @Test
     public void test_MavenError() {
         String consoleOutput = "[INFO] Scanning for projects...\n" +
                 "[INFO] ------------------------------------------------------------------------\n" +
@@ -230,6 +233,7 @@ public class MavenDependencyResolverTest extends TestCase {
         }
     }
 
+    @Test
     public void test_Cached() {
         List<String> dependencies = Arrays.asList("junit.jar");
 
@@ -239,7 +243,7 @@ public class MavenDependencyResolverTest extends TestCase {
         assertSame(dependencies, resolver.resolve(POM_FILE));
     }
 
-
+    @Test
     public void test_multipleDependencies_NotCached_Windows() {
         when(sys.isWindows()).thenReturn(true);
 
@@ -254,7 +258,7 @@ public class MavenDependencyResolverTest extends TestCase {
         verify(dependencyCache).cache(POM_FILE.getFile(), expectedDependencies);
     }
 
-
+    @Test
     public void test_multipleDependencies_NotCached_Unix() {
         when(sys.isWindows()).thenReturn(false);
 
@@ -269,7 +273,7 @@ public class MavenDependencyResolverTest extends TestCase {
         verify(dependencyCache).cache(POM_FILE.getFile(), expectedDependencies);
     }
 
-
+    @Test
     public void test_singleDependency_NotCached() {
         when(sys.isWindows()).thenReturn(false);
 

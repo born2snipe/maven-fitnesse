@@ -12,31 +12,37 @@
  */
 package fitnesse.maven.util;
 
-import junit.framework.TestCase;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-public class CacheTest extends TestCase {
+
+public class CacheTest {
     private InMemoryCache.IsOutOfDateHandler handler;
     private InMemoryCache<String, File> cache;
     private static final File VALUE = new File("value");
     private static final String KEY = "key";
 
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         handler = mock(InMemoryCache.IsOutOfDateHandler.class);
         cache = new InMemoryCache<String, File>(handler);
     }
 
+    @Test
     public void test_hasChanged_NothingCached() {
         when(handler.hasChanged(VALUE)).thenReturn(true);
 
         assertTrue(cache.hasChanged(KEY));
     }
 
+    @Test
     public void test_hasChanged_Changed() {
         cache.cache(KEY, VALUE);
 
@@ -45,6 +51,7 @@ public class CacheTest extends TestCase {
         assertTrue(cache.hasChanged(KEY));
     }
 
+    @Test
     public void test_hasChanged_NotChanged() {
         cache.cache(KEY, VALUE);
 

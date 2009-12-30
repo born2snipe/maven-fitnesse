@@ -19,15 +19,18 @@ import fitnesse.maven.util.MavenDependencyResolver;
 import fitnesse.maven.util.MavenOutputDirectoryResolver;
 import fitnesse.maven.util.MavenPomResolver;
 import fitnesse.wikitext.widgets.ParentWidget;
-import junit.framework.TestCase;
-import static org.mockito.Mockito.*;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
-public class PomWidgetTest extends TestCase {
+
+public class PomWidgetTest {
     private ClasspathWidgetFactory classpathWidgetFactory;
     private MavenDependencyResolver mavenDependencyResolver;
     private ParentWidget parentWidget;
@@ -36,10 +39,8 @@ public class PomWidgetTest extends TestCase {
     private MavenPomResolver mavenPomResolver;
     private static final PomFile POM_FILE = new PomFile(new File("/blah/pom.xml"));
 
-
-    protected void setUp() throws Exception {
-        super.setUp();
-
+    @Before
+    public void setUp() throws Exception {
         mavenDependencyResolver = mock(MavenDependencyResolver.class);
         parentWidget = mock(ParentWidget.class);
         classpathWidgetFactory = mock(ClasspathWidgetFactory.class);
@@ -54,6 +55,7 @@ public class PomWidgetTest extends TestCase {
         PomWidget.MAVEN_POM_RESOLVER = mavenPomResolver;
     }
 
+    @Test
     public void test_pomFileCouldNotBeResolved() throws Exception {
         when(mavenPomResolver.resolve(POM_FILE.getFile())).thenReturn(null);
 
@@ -70,6 +72,7 @@ public class PomWidgetTest extends TestCase {
         verifyZeroInteractions(mavenOutputDirectoryResolver);
     }
 
+    @Test
     public void test_dependencyResolverThrowsException() throws Exception {
         when(mavenPomResolver.resolve(POM_FILE.getFile())).thenReturn(POM_FILE);
         when(mavenDependencyResolver.resolve(POM_FILE)).thenThrow(new MavenException("error"));
@@ -88,7 +91,7 @@ public class PomWidgetTest extends TestCase {
         assertEquals(expectedHtml, removeEndingWhitespace(widget.render()));
     }
 
-
+    @Test
     public void test_multipleDependencies() throws Exception {
         List<String> dependencies = Arrays.asList("junit.jar", "jmock.jar");
 
@@ -112,7 +115,7 @@ public class PomWidgetTest extends TestCase {
         assertEquals(expectedHtml, removeEndingWhitespace(widget.render()));
     }
 
-
+    @Test
     public void test_singleDependency() throws Exception {
         List<String> dependencies = Arrays.asList("junit.jar");
 
