@@ -27,7 +27,9 @@ import fitnesse.wikitext.WidgetBuilder;
 import fitnesse.wikitext.widgets.ClasspathWidget;
 import fitnesse.wikitext.widgets.ParentWidget;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -65,18 +67,23 @@ public class PomWidget extends ClasspathWidget {
         super(parentWidget, inputText);
 
         pomFileInput = parsePomFile(inputText);
-        pomFile = MAVEN_POM_RESOLVER.resolve(new File(pomFileInput));
 
-        if (pomFile != null) {
-            List<String> dependencies = new ArrayList<String>();
-            try {
+        try {
+            pomFile = MAVEN_POM_RESOLVER.resolve(new File(pomFileInput));
+
+            if (pomFile != null) {
+                List<String> dependencies = new ArrayList<String>();
                 dependencies.addAll(MAVEN_OUTPUT_DIR_RESOLVER.resolve(pomFile));
                 dependencies.addAll(MAVEN_DEPENDENCY_RESOLVER.resolve(pomFile));
                 CLASSPATH_WIDGET_FACTORY.build(this, dependencies);
             }
-            catch (MavenException err) {
-                errorMessage = err.getMessage();
-            }
+
+        } catch (MavenException err) {
+            errorMessage = err.getMessage();
+        } catch (Exception err) {
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            err.printStackTrace(new PrintWriter(output));
+            errorMessage = new String(output.toByteArray());
         }
     }
 
@@ -90,11 +97,13 @@ public class PomWidget extends ClasspathWidget {
 
     @Override
     public String render() throws Exception {
-        RawHtml titleElement = createTitleElement("Maven POM could NOT be found: " + pomFileInput);
+        RawHtml titleElement;
         RawHtml bodyElement = new RawHtml(childHtml());
         boolean expanded = false;
 
-        if (pomFile != null) {
+        if (pomFile == null) {
+            titleElement = createTitleElement("Maven POM could NOT be found: " + pomFileInput);
+        } else {
             titleElement = createTitleElement("Maven POM: " + pomFile.getFile());
         }
 
@@ -102,6 +111,7 @@ public class PomWidget extends ClasspathWidget {
             bodyElement = new RawHtml("<pre>" + errorMessage + "</pre>");
             expanded = true;
         }
+
         HtmlElement html = makeCollapsableSection(titleElement, bodyElement, expanded);
         return html.html();
     }
