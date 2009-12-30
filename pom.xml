@@ -85,9 +85,9 @@
             </plugin>
 
             <plugin>
-                <groupId>com.google.code.maven-license-plugin</groupId>
+                <groupId>com.mycila.maven-license-plugin</groupId>
                 <artifactId>maven-license-plugin</artifactId>
-                <version>1.4.0-rc1</version>
+                <version>1.5.0</version>
                 <configuration>
                     <basedir>${basedir}</basedir>
                     <header>${basedir}/header.txt</header>
