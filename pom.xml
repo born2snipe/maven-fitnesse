@@ -18,14 +18,12 @@
             <groupId>commons-digester</groupId>
             <artifactId>commons-digester</artifactId>
             <version>2.0</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-exec</artifactId>
             <version>1.0.1</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -37,7 +35,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>3.8.1</version>
+            <version>4.5</version>
             <scope>test</scope>
         </dependency>
 
